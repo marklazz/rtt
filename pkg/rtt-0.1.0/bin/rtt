@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+# The command line Haml parser.
+$LOAD_PATH.unshift File.dirname(__FILE__) + '/../lib'
+
+require 'rtt'
+Rtt.init
+puts 'rtt!'
