@@ -1,7 +1,6 @@
 #!/usr/bin/ruby -w
 %w( rubygems spec dm-core dm-validations).each { |lib| require lib }
 Dir[File.expand_path(File.join(File.dirname(__FILE__), 'rtt', '*'))].each { |lib| require lib; }
-#Dir['/home/marcelo/workspace/rtt/lib/*'].each { |lib| require lib; }
 
 module Rtt
 
@@ -13,7 +12,7 @@ module Rtt
 
     def init(database = :rtt)
       DataMapper.setup(:default, {:adapter => "sqlite3", :database => "db/#{database.to_s}.sqlite3"})
-      migrate
+      migrate unless missing_tables
     end
 
     # Change the name of the current task.
@@ -31,6 +30,17 @@ module Rtt
           @tasks[old_name] = nil
           @tasks[task_name] = task
         end
+      end
+    end
+
+    # Lists all entries filtered by parameters
+    #
+    # For example:
+    #   Rtt.query :from => '2010-5-3', :to => '2010-5-20', :project => 'project_name'
+
+    def query options = {}
+      Task.all(build_conditions(options)).each do |task|
+        puts "Task: #{task.name}"
       end
     end
 
@@ -81,7 +91,29 @@ module Rtt
       end
     end
 
+    #
+    #
+    def report options = {}
+      raise 'Argument must be a valid Hash. Checkout: rtt usage' unless options.is_a?(Hash) || options.keys.empty?
+      extension = options.keys.first
+      path = options[extension]
+      case extension
+        when :pdf
+          report_to_pdf path
+        when :csv
+          report_to_csv path
+        else
+          raise 'Format not supported. Only csv and pdf are available for the moment.'
+      end
+
+    end
+
     private
+
+    def build_conditions options
+      from = Date.parse(options[:from]) if options[:from]
+      to = Date.parse(options[:to]) if options[:to]
+    end
 
     # Implemented to help test run from clean state
     def clear
@@ -98,6 +130,10 @@ module Rtt
       project = current_project
       project.active = false
       project.save
+    end
+
+    def missing_tables
+      %W(rtt_client_projects rtt_projects rtt_users rtt_clients rtt_task_users rtt_project_tasks rtt_tasks).reject { |table| DataMapper.repository.storage_exists?(table) }.empty?
     end
 
     def set_as_current task
@@ -120,6 +156,15 @@ module Rtt
     def current_task_present?
       current_task
     end
+
+    def report_to_csv output_path
+
+    end
+
+    def report_to_pdf output_path
+
+    end
+
 
     def stop_current
       task = current_task

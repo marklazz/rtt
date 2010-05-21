@@ -41,7 +41,11 @@ $ rtt rate 19.5
 
 This stands for $19.5/h. And this information, as well as the Project and client information will be used to generate a PDF report file. To generate the report, this is the command:
 
-$ rtt report <output-path>
+$ rtt report :csv => <output-path>
+
+or
+
+$ rtt report :pdf => <output-path>
 
 Questions/Comments
 ------------------
