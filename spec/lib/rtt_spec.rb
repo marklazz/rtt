@@ -26,7 +26,7 @@ describe Rtt do
 
   end
 
-  describe '#change_name' do
+  describe '#rename' do
 
     describe 'when there is no current task' do
 
@@ -53,7 +53,7 @@ describe Rtt do
     describe 'when there is a current task' do
 
       before do
-        @current_task = Rtt::Task.create :name => 'older_task', :start_at => Date.new(2010, 4, 1), :active => true
+        @current_task = Rtt::Task.create :name => 'older_task', :start_at => Date.today.beginning_of_day, :active => true
       end
 
       it 'should create a new task' do
@@ -117,7 +117,7 @@ describe Rtt do
     describe 'when there is a current task' do
 
       before do
-        Rtt::Task.create :name => 'older_task', :start_at => Date.new(2010, 4, 1), :active => true
+        Rtt::Task.create :name => 'older_task', :start_at => Date.today.beginning_of_day, :active => true
       end
 
       it 'should finish the task' do
@@ -141,23 +141,23 @@ describe Rtt do
     end
   end
 
-  describe '#change_name' do
+  describe '#rename' do
 
     describe 'When there is a current task' do
 
       before do
-        @current_task = Rtt::Task.create :name => 'older_task', :start_at => Date.new(2010, 4, 1), :active => true
+        @current_task = Rtt::Task.create :name => 'older_task', :start_at => Date.today.beginning_of_day, :active => true
       end
 
       it 'should change the name' do
         @id = @current_task.id
-        Rtt.change_name 'newer_task'
+        Rtt.rename 'newer_task'
         Rtt::Task.get(@id).name.should == 'newer_task'
       end
 
       it 'should keep the number of tasks' do
         counter = Rtt::Task.all.length
-        Rtt.change_name 'newer_task'
+        Rtt.rename 'newer_task'
         Rtt::Task.all.length.should == counter
       end
     end
@@ -165,7 +165,7 @@ describe Rtt do
     describe 'When there is NO current task' do
 
       it 'should not create a new task' do
-        Rtt.change_name 'newer_task'
+        Rtt.rename 'newer_task'
         Rtt::Task.all.length.should be_zero
       end
     end
@@ -174,12 +174,13 @@ describe Rtt do
   describe '#report' do
 
     it 'should call report_for_csv when :pdf is recevied' do
-      Rtt.should_receive(:report_to_pdf).with('/somepath')
+      Rtt.should_receive(:report_to_pdf).with('/somepath', anything)
       Rtt.report :pdf => '/somepath'
     end
 
     it 'should call report_for_csv when :csv is recevied' do
-      Rtt.should_receive(:report_to_csv).with('/somepath_csv')
+      pending
+      Rtt.should_receive(:report_to_csv).with('/somepath_csv', anything)
       Rtt.report :csv => '/somepath_csv'
     end
   end

@@ -11,7 +11,7 @@ module Rtt
     property :last_name, String
     property :active, Boolean, :default => false
 
-    has n, :tasks, :through => Resource
+    has n, :tasks #, :through => Resource
     has n, :projects, :through => :tasks
 
     def self.default

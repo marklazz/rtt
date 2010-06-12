@@ -11,7 +11,7 @@ module Rtt
     property :description, String, :default => DEFAULT_DESCRIPTION
     property :active, Boolean, :default => false
 
-    has n, :tasks, :through => Resource
+    has n, :tasks #, :through => Resource
     has n, :users, :through => :tasks
     belongs_to :client
 

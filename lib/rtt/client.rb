@@ -10,7 +10,7 @@ module Rtt
     property :name, String, :required => true, :unique => true, :default => DEFAULT_NAME
     property :description, String, :default => DEFAULT_DESCRIPTION
     property :active, Boolean, :default => false
-    has n, :projects, :through => Resource
+    has n, :projects #, :through => Resource
 
     def self.default
       first_or_create :active => true

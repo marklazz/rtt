@@ -1,5 +1,5 @@
 #!/usr/bin/ruby -w
-%w( rubygems spec dm-core dm-validations).each { |lib| require lib }
+%w( rubygems spec dm-core dm-validations dm-migrations active_support).each { |lib| require lib }
 Dir[File.expand_path(File.join(File.dirname(__FILE__), 'rtt', '*'))].each { |lib| require lib; }
 
 module Rtt
@@ -10,18 +10,17 @@ module Rtt
 
   class << self
 
-    def init(database = :rtt)
-      DataMapper.setup(:default, {:adapter => "sqlite3", :database => "db/#{database.to_s}.sqlite3"})
-      migrate unless missing_tables
-    end
+    include QueryBuilder
+    include ReportGenerator
+    include Storage
 
     # Change the name of the current task.
     #
     # Usage
     #
-    # chaneg_name 'new_timer_name' => Doesn't change task#start_at
+    # rename 'new_timer_name' => Doesn't change task#start_at
 
-    def change_name task_name
+    def rename task_name
       task = current_task
       if task
         old_name = task.name
@@ -36,16 +35,14 @@ module Rtt
     # Lists all entries filtered by parameters
     #
     # For example:
-    #   Rtt.query :from => '2010-5-3', :to => '2010-5-20', :project => 'project_name'
-
-    def query options = {}
-      Task.all(build_conditions(options)).each do |task|
-        puts "Task: #{task.name}"
+    #   Rtt.list :from => '2010-5-3', :to => '2010-5-20'
+    #
+    def list options = {}
+      puts 'Task List'
+      puts '========='
+      query(options).each do |task|
+        puts "Name: #{task.name} from:#{task.start_at.strftime('%M/%d/%y %H:%M')} to:#{task.end_at.strftime('%M/%d/%y %H:%M')}"
       end
-    end
-
-    def migrate #:nodoc:
-      DataMapper.auto_migrate!
     end
 
     # Used to set the client at system level.
@@ -84,56 +81,33 @@ module Rtt
     # Stops the current task.
     #
     def stop
-      task = current_task
-      if task
-        update_task_field task.name, :end_at
-        stop_current
-      end
-    end
-
-    #
-    #
-    def report options = {}
-      raise 'Argument must be a valid Hash. Checkout: rtt usage' unless options.is_a?(Hash) || options.keys.empty?
-      extension = options.keys.first
-      path = options[extension]
-      case extension
-        when :pdf
-          report_to_pdf path
-        when :csv
-          report_to_csv path
-        else
-          raise 'Format not supported. Only csv and pdf are available for the moment.'
-      end
-
+      stop_current if current_task
     end
 
     private
 
-    def build_conditions options
-      from = Date.parse(options[:from]) if options[:from]
-      to = Date.parse(options[:to]) if options[:to]
-    end
-
-    # Implemented to help test run from clean state
+   # Implemented to help test run from clean state
     def clear
       @tasks = {}
       @clients = {}
     end
 
     def client(name)
-      @clients = {} if @clients.nil?
-      @clients[name.to_sym] ||= Client.first_or_create :name => name
+      #@clients = {} if @clients.nil?
+      #@clients[name.to_sym] ||= Client.first_or_create :name => name
+      Client.first_or_create :name => name
+    end
+
+    def deactivate_current_client
+      client = current_client
+      client.active = false
+      client.save
     end
 
     def deactivate_current_project
       project = current_project
       project.active = false
       project.save
-    end
-
-    def missing_tables
-      %W(rtt_client_projects rtt_projects rtt_users rtt_clients rtt_task_users rtt_project_tasks rtt_tasks).reject { |table| DataMapper.repository.storage_exists?(table) }.empty?
     end
 
     def set_as_current task
@@ -157,26 +131,15 @@ module Rtt
       current_task
     end
 
-    def report_to_csv output_path
+   def stop_current
+     current_task.stop
+   end
 
-    end
-
-    def report_to_pdf output_path
-
-    end
-
-
-    def stop_current
-      task = current_task
-      task.end_at = Time.now
-      task.active = false
-      task.save
-    end
-
-    def task name
-      @tasks = {} if @tasks.nil?
-      @tasks[name.to_sym] ||= Task.first_or_create :name => name
-    end
+   def task name
+      #@tasks = {} if @tasks.nil?
+      #@tasks[name.to_sym] ||= Task.first_or_create :name => name
+      Task.first_or_create :name => name
+   end
 
     def update_task_field task_name, field_name
       name = task_name || Task::DEFAULT_NAME
