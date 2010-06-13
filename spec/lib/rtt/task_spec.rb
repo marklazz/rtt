@@ -6,7 +6,6 @@ describe Rtt::Task do
   before do
     Rtt.init(:test)
     Rtt.migrate
-    Rtt.send(:clear)
   end
 
   describe '#duration' do

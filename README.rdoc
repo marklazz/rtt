@@ -24,7 +24,7 @@ Task can be grouped in Projects. For that you must set the project before starti
 
 $ rtt set project <project-name>
 ..
-$ rtt start <task-name>
+$ rtt '<task-name>' ( or the more explicit way: 'rtt start <task-name>')
 ..
 
 Anagolous, you can define a Client for the current project by typing:

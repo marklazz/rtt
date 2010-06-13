@@ -5,7 +5,6 @@ describe Rtt do
   before do
     Rtt.init(:test)
     Rtt.migrate
-    Rtt.send(:clear)
   end
 
   describe '#set_project' do

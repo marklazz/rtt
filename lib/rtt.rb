@@ -9,7 +9,8 @@ module Rtt
   extend self
 
   class << self
-
+    
+    include CmdLineInterpreter
     include QueryBuilder
     include ReportGenerator
     include Storage
@@ -23,12 +24,8 @@ module Rtt
     def rename task_name
       task = current_task
       if task
-        old_name = task.name
         task.name = task_name
-        if task.save
-          @tasks[old_name] = nil
-          @tasks[task_name] = task
-        end
+        task.save
       end
     end
 
@@ -86,15 +83,7 @@ module Rtt
 
     private
 
-   # Implemented to help test run from clean state
-    def clear
-      @tasks = {}
-      @clients = {}
-    end
-
     def client(name)
-      #@clients = {} if @clients.nil?
-      #@clients[name.to_sym] ||= Client.first_or_create :name => name
       Client.first_or_create :name => name
     end
 
@@ -136,8 +125,6 @@ module Rtt
    end
 
    def task name
-      #@tasks = {} if @tasks.nil?
-      #@tasks[name.to_sym] ||= Task.first_or_create :name => name
       Task.first_or_create :name => name
    end
 

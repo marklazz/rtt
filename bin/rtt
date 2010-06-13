@@ -4,4 +4,5 @@ $LOAD_PATH.unshift File.dirname(__FILE__) + '/../lib'
 
 require 'rtt'
 Rtt.init
-puts 'rtt!'
+command = Rtt.capture(ARGV)
+Rtt.execute(command)
