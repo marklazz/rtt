@@ -1,0 +1,10 @@
+RTT is a tool for tracking time. It's primary extend is to be used from command line.
+
+Usage:
+
+ rtt start <task-name>
+ rtt stop <task-name>
+ rtt client <client-name>
+ rtt project <project-name>
+ rtt renmae <project-name>
+ rtt report <filename>.pdf
