@@ -2,30 +2,28 @@
 module Rtt
   class Command
     attr_accessor :name, :optional
-    cattr_accessor :param_required
   end
-  class SetProjectCommand
-    @@param_required = 1
+  class SetProjectCommand < Command
+    NUMBER_OF_PARAM_REQUIRED = 1
   end
-  class SetClientCommand
-    @@param_required = 1
+  class SetClientCommand < Command
+    NUMBER_OF_PARAM_REQUIRED = 1
   end
-  class StartCommand
-    @@param_required = 1
+  class StartCommand < Command
+    NUMBER_OF_PARAM_REQUIRED = 1
   end
-  class StopCommand
-    @@param_required = 0
+  class StopCommand < Command
+    NUMBER_OF_PARAM_REQUIRED = 0
   end
-  class RenameCommand
-    @@param_required = 1
+  class RenameCommand < Command
+    NUMBER_OF_PARAM_REQUIRED = 1
   end
-  class ReportCommand
-    @@param_required = 1
+  class ReportCommand < Command
+    NUMBER_OF_PARAM_REQUIRED = 1
   end
 
   module CmdLineInterpreter
 
-    KEYWORDS = [ 'client', 'project', 'rename', 'start', 'stop' 'report' ]
     COMMAND_MAPPING = {
      :project => SetProjectCommand,
      :client => SetClientCommand,
@@ -39,13 +37,13 @@ module Rtt
       if arguments.length == 0
         puts_usage
       else
-        op = arguments.first.to_sym
-        if KEYWORDS.include?(op)
-          klazz = COMMAND_MAPPING[op]
-          if (arguments.length - 1) == klazz.param_required
+        operation = arguments.shift.to_sym
+        if COMMAND_MAPPING.keys.include?(operation)
+          klazz = COMMAND_MAPPING[operation]
+          if arguments.length == klazz::NUMBER_OF_PARAM_REQUIRED
             command = klazz.new
-            command.name = arguments[1]
-            command.optional = arguments[2..-1] if arguments.length > 1
+            command.name = operation
+            command.optional = arguments[1..-1] if arguments.length > 1
             command
           else
           puts_usage
@@ -57,7 +55,7 @@ module Rtt
     end
 
     def execute(cmd)
-      case cmd.class
+      case cmd
         when SetProjectCommand
           client = cmd.optional if cmd.optional.present?
           Rtt.set_project(cmd.name, client)
@@ -69,7 +67,10 @@ module Rtt
           Rtt.stop
         when ReportCommand
           Rtt.report(:pdf => cmd.name)
+        else
+          return puts_usage
       end
+      puts "Operation succeded."
     end
 
     def puts_usage
