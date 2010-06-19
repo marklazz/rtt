@@ -25,7 +25,7 @@ module Rtt
     NUMBER_OF_PARAM_REQUIRED = 1
   end
   class ReportCommand < Command
-    NUMBER_OF_PARAM_REQUIRED = 1
+    NUMBER_OF_PARAM_REQUIRED = 0
   end
   class QueryCommand < Command
     NUMBER_OF_PARAM_REQUIRED = 0
@@ -53,7 +53,7 @@ module Rtt
         operation = arguments.shift.to_sym
         if COMMAND_MAPPING.keys.include?(operation)
           klazz = COMMAND_MAPPING[operation]
-          if arguments.length == klazz::NUMBER_OF_PARAM_REQUIRED
+          if arguments.length >= klazz::NUMBER_OF_PARAM_REQUIRED
             command = klazz.new
             command.name = arguments.shift
             command.optional = arguments if arguments.present?
@@ -104,7 +104,7 @@ module Rtt
         when QueryCommand
           list(env_filters)
         when SetUserCommand
-          set_user
+          set_user(cmd.name)
         else
           raise CommandNotFoundError
       end

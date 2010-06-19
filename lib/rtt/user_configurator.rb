@@ -2,10 +2,12 @@
 module Rtt
   module UserConfigurator
 
-    def configure_user
+    def configure_user(nickname = nil)
       say "Please fill in your personal information"
       say "========================================"
-      nickname = ask('Nickname:') { |q| q.validate = /^\w+$/ }
+      unless nickname.present?
+        nickname = ask('Nickname (Required):') { |q| q.validate = /^\w+$/ }
+      end
       first_name = ask('First name:')
       last_name = ask('Last name:')
       company = ask('Company:')

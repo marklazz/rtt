@@ -4,6 +4,7 @@ module Rtt
 
     attr_accessor :data, :different_fixed
 
+    DEFAULT_FILENAME = 'rtt_report'
     FORMATS_ACCEPTED = [ :csv, :pdf ]
     REPORT_FIELDS = %w(Client Project Name Date Duration)
     FIXED_FIELDS = %w(Client Project)
@@ -75,7 +76,7 @@ module Rtt
       puts "Missing gem: Fastercsv"
     end
 
-     def report_to_pdf output_path = 'rtt_report'
+     def report_to_pdf output_path
       require 'prawn'
       require 'prawn/layout'
       require "prawn/measurement_extensions"
@@ -93,36 +94,49 @@ module Rtt
                      :top_margin => 0.1.dm,    # work
                      :bottom_margin => 0.01.m, # well
                      :page_size => 'A4') do
-        move_down 10
+
+        cell [330, 790],
+          :text => report_generator.current_user.full_name_and_nickname,
+          :width => 225, :padding => 10, :border_width => 0, :align => :right
+        cell [330, 770],
+          :text => report_generator.current_user.company,
+          :width => 225, :padding => 10, :border_width => 0, :align => :right
+        cell [330, 750],
+          :text => report_generator.current_user.location,
+          :width => 225, :padding => 10, :border_width => 0, :align => :right
+        cell [330, 730],
+          :text => report_generator.current_user.address,
+          :width => 225, :padding => 10, :border_width => 0, :align => :right
+        cell [330, 710],
+          :text => report_generator.current_user.phone,
+          :width => 225, :padding => 10, :border_width => 0, :align => :right
+        cell [330, 690],
+          :text => report_generator.current_user.email,
+          :width => 225, :padding => 10, :border_width => 0, :align => :right
+        cell [330, 670],
+          :text => report_generator.current_user.site,
+          :width => 225, :padding => 10, :border_width => 0, :align => :right
+
+        move_up 140
         font_size 16
         text "RTT Report"
         text "=========="
-        move_down 5
+        move_down 40
 
-        move_up 20
-        
-        full_name_text = report_generator.current_user.full_name.present? ? report_generator.current_user.full_name : ''
-        nickname_text = report_generator.current_user.nickname.present? ? "(#{report_generator.current_user.nickname})" : ""
-        company_text = report_generator.current_user.company.present? ? report_generator.current_user.company : ''
-        email_text = report_generator.current_user.email.present? ? report_generator.current_user.email : ''
-        address_text = report_generator.current_user.address.present? ? report_generator.current_user.address : ''
-        country_text = report_generator.current_user.country.present? ? report_generator.current_user.country : ''
-        city_text = report_generator.current_user.city.present? ? report_generator.current_user.city : ''
-        phone_text = report_generator.current_user.phone.present? ? report_generator.current_user.phone : ''
-        location_text = "#{city_text}, #{country_text}"
-        site_text = report_generator.current_user.site.present? ? report_generator.current_user.site : ''
-        text "#{full_name_text} (#{nickname_text})", :align => :right
-        text company_text, :align => :right
-        text email_text, :align => :right
-        text address_text, :align => :right
-        text location_text, :align => :right
-        text phone_text, :align => :right
-        text site_text, :align => :right
 
-        move_up 20
+#        text report_generator.current_user.full_name_and_nickname, :align => :right
+        #text report_generator.current_user.company, :align => :right
+        #text report_generator.current_user.email, :align => :right
+        #text report_generator.current_user.address, :align => :right
+        #text report_generator.current_user.location, :align => :right
+        #text report_generator.current_user.phone, :align => :right
+        #text report_generator.current_user.site, :align => :right
+
         report_generator.fixed_fields_for_current_data.each do |field|
           text "#{field}: #{report_generator.fixed_value(field)}"
         end
+
+        move_down 50
 
         table data,
           :headers => columns,
@@ -139,10 +153,6 @@ module Rtt
         move_down 20
         text "Total: #{total_h}h#{total_m}m"
         
-#        cell [450, 800],
-          #:text => report_generator.current_user.full_name,
-          #:width => 225, :padding => 10, :border_width => 0
-
         # footer
 #        page_count.times do |i|
             #go_to_page(i+1)
@@ -152,7 +162,7 @@ module Rtt
         #end
         number_pages "Page <page> / <total>", [bounds.right - 80, 0]
 
-        render_file output_path
+        render_file(output_path || DEFAULT_FILENAME)
       end
     rescue LoadError
       puts "Missing gem: prawn, prawn/layout or prawn/measurement_extensions"

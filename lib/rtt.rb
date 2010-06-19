@@ -19,10 +19,14 @@ module Rtt
       User.first :active => true
     end
 
-    def set_user
-      deactivate_current_user if current_user
-      extend(UserConfigurator)
-      configure_user
+    def set_user(nickname = nil)
+      current_user.deactivate if current_user
+      if nickname && (user = User.first(:nickname => nickname)).present?
+        user.activate
+      else
+        extend(UserConfigurator)
+        configure_user(nickname)
+      end
     end
 
     # Change the name of the current task.
@@ -104,12 +108,6 @@ module Rtt
 
     def client(name)
       Client.first_or_create :name => name, :description => name
-    end
-
-    def deactivate_current_user
-      user = current_user
-      user.active = false
-      user.save
     end
 
     def deactivate_current_client
