@@ -4,7 +4,9 @@ RTT - Ruby Time Tracker
 
 RTT is a tool for tracking time. It's primary extend is to be used from command line. It could be used by simple typing:
 
-$ rtt start <task-name>
+$ rtt start <task-name> 
+
+If no <task-name> is specified the last paused one is activated, otherwise a task with 'Default task' name would be created.
 
 Then to stop the timer, you can do:
 
@@ -12,40 +14,63 @@ $ rtt stop
 
 Also, by just typying: 'rtt start', without specifying the task, it would default to the previous task.
 
+If you start a task with the same name as one already stored for the very same day, then the elapsed time for both activities will be sum into just one task.
+
 Installation
 ------------
 
 [sudo] gem install rtt
+
+After installing the gem you will need to setup some basic information of yours (data to be printed in the reports). With the following command:
+
+$ rtt user <user-nick-name>
+
+Then you will be prompt for First name, Last name, country, city, e-mail, site, etc. Information that will be used to fill-in the reports. 
+
+The only required field is the Nickname, which identifies the user.
+
+How to start a task?
+--------------------
+
+$ rtt '<task-name>' ( or the more explicit way: 'rtt start <task-name>')
+..
+
+That simple!
 
 More about the API
 ------------------
 
 Task can be grouped in Projects. For that you must set the project before starting the timer, in the following way:
 
-$ rtt set project <project-name>
-..
-$ rtt '<task-name>' ( or the more explicit way: 'rtt start <task-name>')
+$ rtt project <project-name>
 ..
 
 Anagolous, you can define a Client for the current project by typing:
 
-$ rtt set client <client-name>
+$ rtt client <client-name>
 
+To list all task you can use
+
+$ rtt list
+
+Also, if you have added times for different projects or clients and you may want to filtered this list by one of those dimensions. Then you can do that, by using environment variables like this:
+
+$ CLIENT=MyClient PROJECT=SomeProject rtt list
+
+This command will list all tasks that belongs to the client called 'MyClient' and to the project called 'SomeProject'.
 
 Report
 -------
 
-RTT allow you to build a report document, so you can check the time. If you want to add the rate for hour for given project you can do that too, by running this:
+RTT allow you to build a pdf document with all the entries using the following command:
 
-$ rtt rate 19.5
+$ rtt report <output-filename>
 
-This stands for $19.5/h. And this information, as well as the Project and client information will be used to generate a PDF report file. To generate the report, this is the command:
+Also, you can filter the entries of this report in a similar manner as you would do for 'list' command. For example:
 
-$ rtt report :csv => <output-path>
+$ PROJECT=SomeProject rtt report
 
-or
-
-$ rtt report :pdf => <output-path>
+This will generate a report for the project 'SomeProject'.
 
 Questions/Comments
 ------------------

@@ -69,11 +69,15 @@ module Rtt
 
     def stop
       split_task if span_multiple_days?
-      deactivate
+      finish
       self
     end
 
-    alias_method :pause, :stop
+    def pause
+      split_task if span_multiple_days?
+      finish(DateTime.now, true)
+      self
+    end
 
     def time_difference_since_start_at
       end_date_or_now = self.end_at ? self.end_at : DateTime.now
@@ -87,11 +91,11 @@ module Rtt
       "#{hours}h#{mins}m"
     end
 
-    def deactivate(end_at = DateTime.now)
+    def finish(end_at = DateTime.now, activation = false)
       self.end_at = end_at
       self.date = end_at.to_date
       self.add_current_spent_time_to_accumulated_spent_time
-      self.active = false
+      self.active = activation
       self.save
     end
 
@@ -99,14 +103,14 @@ module Rtt
       task = clone_task(self)
       task.start_at = date.beginning_of_day
       end_at = date.end_of_day.to_datetime
-      task.send(:deactivate, end_at)
+      task.send(:finish, end_at)
       task.save
     end
 
     def save_last_task_split(date)
       task = clone_task(self)
       end_at = date.end_of_day.to_datetime
-      task.send(:deactivate, end_at)
+      task.send(:finish, end_at)
       task.save
     end
 

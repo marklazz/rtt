@@ -3,10 +3,11 @@ RTT is a tool for tracking time. It's primary extend is to be used from command 
 Usage:
 
  rtt start <task-name>
- rtt stop <task-name>
- rtt user <nickname> <first_name> <last_name> <company>
+ rtt pause
+ rtt stop
+ rtt user <nickname>
  rtt client <client-name>
  rtt project <project-name>
- rtt renmae <project-name>
- rtt report <filename>.pdf
+ rtt rename <new-name-current-task>
  rtt list
+ rtt report <filename>.pdf
