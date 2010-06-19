@@ -3,14 +3,14 @@ require 'echoe'
 
 # PACKAGING ============================================================
 
-Echoe.new('rtt', '0.1.0') do |p|
+Echoe.new('rtt', '0.0.1') do |p|
   p.description = 'RTT is a tool for tracking time'
-  p.url = 'http://'
+  p.url = 'http://www.marklazz.com'
   p.author = 'Marcelo Giorgi'
   p.email = 'marklazz.uy@gmail.com'
   p.ignore_pattern = [ 'tmp/*', 'script/*' ]
-  # p.runtime_dependencies = [ "rupport >= 1.6.4" ]
-  p.development_dependencies = []
+  p.runtime_dependencies = [ ['highline', ">= 1.5.2"], ['active_support', '>= 2.1.0'], ['prawn', '>= 0.8.0'], ['dm-core', '>= 1.0.0'], [ 'dm-migrations', '>= 1.0.0'] ]
+  p.development_dependencies = [ 'spec' ]
 end
 
 Dir["#{File.dirname(__FILE__)}/tasks/*.rake"].sort.each { |ext| load ext }
