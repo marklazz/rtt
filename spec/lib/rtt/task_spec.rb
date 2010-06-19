@@ -6,6 +6,8 @@ describe Rtt::Task do
   before do
     Rtt.init(:test)
     Rtt.migrate
+    @task_name = 'a_name'
+    @now = Time.now
   end
 
   describe '#duration' do
@@ -13,14 +15,18 @@ describe Rtt::Task do
     context 'task has start_at: 2010-05-10 13:45' do
 
       before do
-        @task = Rtt::Task.create :name => 'a_name', :start_at => DateTime.new(2010, 5, 10, 13, 45, 0)
+        start_at = Time.parse('May 10 13:45:00 2010', @now)
+        @task = Rtt::Task.create :name => @task_name, :start_at => start_at.to_datetime, :date => start_at.to_date
       end
 
-      context 'task has end_at: 2010-05-10 14:15' do
+      context 'task has end_at: 2010-05-10 14:15:01' do
 
         before do
-          @task.end_at = DateTime.new(2010, 5, 10, 14, 15, 0)
-          @task.save
+          now = Time.now
+          @end_at = Time.parse('May 10 14:15:01 2010', @now)
+          DateTime.stubs(:now => @end_at)
+          Date.stubs(:today => @end_at.to_date)
+          @task.stop
         end
 
         it 'should return 0h30m' do
@@ -28,11 +34,13 @@ describe Rtt::Task do
         end
       end
 
-      context 'task has end_at: 2010-05-10 15:20' do
+      context 'task has end_at: 2010-05-10 15:20:01' do
 
         before do
-          @task.end_at = DateTime.new(2010, 5, 10, 15, 20, 0)
-          @task.save
+          @end_at = Time.parse('May 10 15:20:01 2010', @now)
+          DateTime.stubs(:now => @end_at)
+          Date.stubs(:today => @end_at.to_date)
+          @task.stop
         end
 
         it 'should return 1h35m' do
@@ -40,28 +48,57 @@ describe Rtt::Task do
         end
       end
 
-      context 'task has end_at: 2010-05-11 15:20' do
+      context 'task has end_at: 2010-05-11 15:20:01' do
 
         before do
-          @task.end_at = DateTime.new(2010, 5, 11, 15, 20, 0)
-          @task.save
+          @end_at = Time.parse('May 11 15:20:00 2010', @now)
+          DateTime.stubs(:now => @end_at)
+          Date.stubs(:today => @end_at.to_date)
+          @task.stop
         end
 
-        it 'should return 25h35m' do
-          @task.duration.should == '25h35m'
+        it 'should have 2 tasks with the same name' do
+          Rtt::Task.all(:name => @task_name).length.should == 2
+        end
+
+        it 'should return 11h15m for 2010-05-10' do
+          date = Time.parse('2010-05-10', @now).to_date
+          task = Rtt::Task.first(:name => @task_name, :date => date)
+          task.duration.should == '10h14m'
+        end
+
+        it 'should return 14h35m' do
+          @task.duration.should == '15h19m'
         end
       end
 
-      context 'no end_at is defined.' do
+      context 'task has end_at: 2010-05-12 15:20:01' do
 
         before do
-          @task.end_at = nil
-          @task.save
-          DateTime.stubs(:now => DateTime.new(2010, 5, 10, 13, 50, 0))
+          @end_at = Time.parse('May 12 15:20:00 2010', @now)
+          DateTime.stubs(:now => @end_at)
+          Date.stubs(:today => @end_at.to_date)
+          @task.stop
         end
 
-        it 'should use current time' do
-          @task.duration.should == '0h5m'
+        it 'should have 3 tasks with the same name' do
+          Rtt::Task.all(:name => @task_name).length.should == 3
+        end
+
+        it 'should return 11h15m for 2010-05-11' do
+          date = Time.parse('2010-05-11', @now).to_date
+          task = Rtt::Task.first(:name => @task_name, :date => date)
+          task.duration.should == '23h59m'
+        end
+
+        it 'should return 11h15m for 2010-05-10' do
+          date = Time.parse('2010-05-10', @now).to_date
+          task = Rtt::Task.first(:name => @task_name, :date => date)
+          task.duration.should == '10h14m'
+        end
+
+        it 'should return 14h35m' do
+          @task.duration.should == '15h19m'
         end
       end
     end

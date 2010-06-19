@@ -4,7 +4,9 @@ Usage:
 
  rtt start <task-name>
  rtt stop <task-name>
+ rtt user <nickname> <first_name> <last_name> <company>
  rtt client <client-name>
  rtt project <project-name>
  rtt renmae <project-name>
  rtt report <filename>.pdf
+ rtt list

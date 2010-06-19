@@ -1,0 +1,3 @@
+1) Acomodar la firma del user en el pdf
+2) Un script para inicializar el user
+1) Hacer q el current project cambie el client

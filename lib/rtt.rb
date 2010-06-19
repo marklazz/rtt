@@ -15,6 +15,15 @@ module Rtt
     include ReportGenerator
     include Storage
 
+    def current_user
+      User.first :active => true
+    end
+
+    def set_user nickname, first_name, last_name, company, email, country, city, address, phone, site
+      deactivate_current_user if current_user
+      User.first_or_create :nickname => nickname, :first_name => first_name, :last_name => last_name, :company => company, :email => email, :address => address, :country => country, :city => city, :phone => phone, :site => site, :active => true
+    end
+
     # Change the name of the current task.
     #
     # Usage
@@ -38,10 +47,21 @@ module Rtt
       puts 'Task List'
       puts '========='
       query(options).each do |task|
-        puts "Name: #{task.name} from:#{task.start_at.strftime('%M/%d/%y %H:%M')} to:#{task.end_at.strftime('%M/%d/%y %H:%M')}"
+          puts "Name: #{task.name} from:#{task.start_at.strftime('%M/%d/%y %H:%M') if task.start_at} to:#{task.end_at.strftime('%M/%d/%y %H:%M') if task.end_at}"
       end
     end
 
+
+    # Used to set the client at system level.
+    #
+    # Usage
+    #
+    # pause
+    def pause
+      current_task.stop if current_task
+    end
+    
+    #
     # Used to set the client at system level.
     #
     # Usage
@@ -56,7 +76,7 @@ module Rtt
     def set_project project_name, client_name = nil
       deactivate_current_project if current_project
       client = client(client_name) unless client_name.nil?
-      project = Project.first_or_create :name => project_name
+      project = Project.first_or_create :name => project_name, :description => project_name
       project.activate_with_client(client)
     end
 
@@ -67,24 +87,28 @@ module Rtt
     # start a time new:
     #
     # start 'new_task'
-
+    # TODO: Make it start PAUSED TASKS!
     def start(task_name = nil)
-      stop_current if current_task_present?
-      task = update_task_field task_name, :start_at
-      set_as_current task
-      task
+      current_task.stop if current_task.present? 
+      Task::task(task_name).start
     end
 
     # Stops the current task.
     #
     def stop
-      stop_current if current_task
+      current_task.stop if current_task
     end
 
     private
 
     def client(name)
-      Client.first_or_create :name => name
+      Client.first_or_create :name => name, :description => name
+    end
+
+    def deactivate_current_user
+      user = current_user
+      user.active = false
+      user.save
     end
 
     def deactivate_current_client
@@ -99,11 +123,6 @@ module Rtt
       project.save
     end
 
-    def set_as_current task
-      task.active = true
-      task.save
-    end
-
     def current_client
       Client.first :active => true
     end
@@ -114,28 +133,6 @@ module Rtt
 
     def current_task
       Task.first :active => true
-    end
-
-    def current_task_present?
-      current_task
-    end
-
-   def stop_current
-     current_task.stop
-   end
-
-   def task name
-      Task.first_or_create :name => name
-   end
-
-    def update_task_field task_name, field_name
-      name = task_name || Task::DEFAULT_NAME
-      task = task(name)
-      if task.__send__(field_name.to_sym).nil?
-        task.__send__("#{field_name}=".to_sym, Time.now)
-        task.save
-      end
-      task
     end
   end
 end

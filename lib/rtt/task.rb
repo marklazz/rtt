@@ -6,10 +6,12 @@ module Rtt
     DEFAULT_NAME = 'Default task'
 
     property :id, Serial
-    property :name, String, :required => true, :default => DEFAULT_NAME
+    property :name, Text, :required => true, :default => DEFAULT_NAME
+    property :date, Date
     property :start_at, DateTime
     property :end_at, DateTime
     property :active, Boolean, :default => false
+    property :accumulated_spent_time, Float, :default => 0
 
     belongs_to :project
     has 1, :client, :through => :project
@@ -18,9 +20,44 @@ module Rtt
     before :valid?, :set_default_project
     before :valid?, :set_default_user
 
+    def self.task(task_name)
+      base_attributes = { :name => task_name, :user => Rtt.current_user, :date => Date.today }
+      if task_name.nil?
+        existing_task = Task.first :active => true
+        if existing_task
+          existing_task
+        else
+          base_attributes.merge!(:name => DEFAULT_NAME) if task_name.blank?
+          Task.create(base_attributes)
+        end
+      elsif (existing_task = Task.first base_attributes.merge({:start_at.gte => Date.today.beginning_of_day})).present?
+        puts existing_task.accumulated_spent_time
+        existing_task
+      else
+        Task.create(base_attributes)
+      end
+    end
+
+    def start
+      self.start_at = DateTime.now
+      self.active = true
+      save
+      self
+    end
+
+    def add_current_spent_time_to_accumulated_spent_time
+      self.accumulated_spent_time = self.accumulated_spent_time + self.time_difference_since_start_at
+    end
+
+    def clone_task(task)
+      task = Task.new
+      task.attributes = self.attributes
+      task.id = nil
+      task
+    end
+
     def duration
-      end_date_or_now = self.end_at ? self.end_at : DateTime.now
-      convert_to_hour_and_minutes(end_date_or_now - self.start_at)
+      convert_to_hour_and_minutes(accumulated_spent_time)
     end
 
     def set_default_project
@@ -37,6 +74,13 @@ module Rtt
       self
     end
 
+    alias_method :pause, :stop
+
+    def time_difference_since_start_at
+      end_date_or_now = self.end_at ? self.end_at : DateTime.now
+      end_date_or_now - self.start_at
+    end
+
     private
 
     def convert_to_hour_and_minutes(dif)
@@ -44,22 +88,26 @@ module Rtt
       "#{hours}h#{mins}m"
     end
 
-    def deactivate
-      self.end_at = DateTime.now
+    def deactivate(end_at = DateTime.now)
+      self.end_at = end_at
+      self.date = end_at.to_date
+      self.add_current_spent_time_to_accumulated_spent_time
       self.active = false
       self.save
     end
 
     def save_in_between_days_split(date)
-      task = self.clone
+      task = clone_task(self)
       task.start_at = date.beginning_of_day
-      task.end_at = date.end_of_day
+      end_at = date.end_of_day.to_datetime
+      task.send(:deactivate, end_at)
       task.save
     end
 
     def save_last_task_split(date)
-      task = self.clone
-      task.end_at = date.end_of_day
+      task = clone_task(self)
+      end_at = date.end_of_day.to_datetime
+      task.send(:deactivate, end_at)
       task.save
     end
 
@@ -69,12 +117,12 @@ module Rtt
 
     def split_task
       date = Date.today - 1
-      while (date != self.start_at.day)
+      while (date > self.start_at)
         save_in_between_days_split(date)
         date -= 1
       end
       save_last_task_split(date)
-      self.start_at = Date.today.beginning_of_day
+      self.start_at = Date.today.beginning_of_day.to_datetime
     end
 
     def time_diff_in_hours_and_minutes(dif)
