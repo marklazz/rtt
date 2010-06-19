@@ -75,7 +75,7 @@ module Rtt
       puts "Missing gem: Fastercsv"
     end
 
-     def report_to_pdf output_path
+     def report_to_pdf output_path = 'rtt_report'
       require 'prawn'
       require 'prawn/layout'
       require "prawn/measurement_extensions"
@@ -101,13 +101,23 @@ module Rtt
 
         move_up 20
         
-        text "#{report_generator.current_user.full_name} (#{report_generator.current_user.nickname})", :align => :right
-        text report_generator.current_user.company, :align => :right
-        text report_generator.current_user.email, :align => :right
-        text report_generator.current_user.address, :align => :right
-        text "#{report_generator.current_user.city}, #{report_generator.current_user.country}", :align => :right
-        text report_generator.current_user.phone, :align => :right
-        text report_generator.current_user.site, :align => :right
+        full_name_text = report_generator.current_user.full_name.present? ? report_generator.current_user.full_name : ''
+        nickname_text = report_generator.current_user.nickname.present? ? "(#{report_generator.current_user.nickname})" : ""
+        company_text = report_generator.current_user.company.present? ? report_generator.current_user.company : ''
+        email_text = report_generator.current_user.email.present? ? report_generator.current_user.email : ''
+        address_text = report_generator.current_user.address.present? ? report_generator.current_user.address : ''
+        country_text = report_generator.current_user.country.present? ? report_generator.current_user.country : ''
+        city_text = report_generator.current_user.city.present? ? report_generator.current_user.city : ''
+        phone_text = report_generator.current_user.phone.present? ? report_generator.current_user.phone : ''
+        location_text = "#{city_text}, #{country_text}"
+        site_text = report_generator.current_user.site.present? ? report_generator.current_user.site : ''
+        text "#{full_name_text} (#{nickname_text})", :align => :right
+        text company_text, :align => :right
+        text email_text, :align => :right
+        text address_text, :align => :right
+        text location_text, :align => :right
+        text phone_text, :align => :right
+        text site_text, :align => :right
 
         move_up 20
         report_generator.fixed_fields_for_current_data.each do |field|
