@@ -81,9 +81,9 @@ describe Rtt do
 
       describe 'task name is absent' do
 
-        it 'should use a Default name for the new task' do
+        it 'should use use the existing active task' do
           task = Rtt.start
-          task.name.should == Rtt::Task::DEFAULT_NAME
+          task.name.should == 'older_task'
         end
       end
     end
