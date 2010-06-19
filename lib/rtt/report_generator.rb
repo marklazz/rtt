@@ -12,7 +12,7 @@ module Rtt
       'Client' => Proc.new { |task| task.client.name },
       'Project' => Proc.new { |task| task.project.name },
       'Name' => Proc.new { |task| task.name },
-      'Date' => Proc.new { |task| task.end_at.strftime('%m-%d-%y') },
+      'Date' => Proc.new { |task| task.date.strftime('%m-%d-%y') },
       'Duration' => Proc.new { |task| task.duration }
     }
 
@@ -82,9 +82,10 @@ module Rtt
     def calculate_total_hours_and_minutes(data)
       data.inject([0, 0]) do |totals, task|
         total_h, total_m = totals
-        task[4 - fixed_fields_for_current_data.length].match(/^(\d+)h(\d+)m$/)
-        total_m += ($2.to_i % 60)
-        total_h += ($1.to_i + $2.to_i / 60)
+        if task[4 - fixed_fields_for_current_data.length].match(/^(\d+)h(\d+)m$/)
+          total_m += ($2.to_i % 60)
+          total_h += ($1.to_i + $2.to_i / 60)
+        end
         [ total_h, total_m ]
       end
     end
@@ -104,10 +105,9 @@ module Rtt
       require 'prawn'
       require 'prawn/layout'
       require "prawn/measurement_extensions"
-
       columns = REPORT_FIELDS - fixed_fields_for_current_data
       data = @data[:rows].map { |task| task_row_for_fields(task, columns) }
-      
+     
       
       total_h, total_m = calculate_total_hours_and_minutes(data)
       report_generator = self

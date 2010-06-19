@@ -56,6 +56,7 @@ module Rtt
     end
 
     def duration
+      return '-' if end_at.blank?
       convert_to_hour_and_minutes(accumulated_spent_time)
     end
 

@@ -16,7 +16,7 @@ module Rtt
     NUMBER_OF_PARAM_REQUIRED = 1
   end
   class StartCommand < Command
-    NUMBER_OF_PARAM_REQUIRED = 1
+    NUMBER_OF_PARAM_REQUIRED = 0
   end
   class StopCommand < Command
     NUMBER_OF_PARAM_REQUIRED = 0
@@ -59,9 +59,9 @@ module Rtt
             command.optional = arguments if arguments.present?
             Array(command)
           end
-        else
+        elsif operation.present?
           command = StartCommand.new
-          command.name = arguments.shift
+          command.name = operation
           command.optional = arguments if arguments.present?
           Array(command)
         end

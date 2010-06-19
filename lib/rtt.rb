@@ -52,7 +52,7 @@ module Rtt
       puts 'Task List'
       puts '========='
       query(options).each do |task|
-          puts "Name: #{task.name} from:#{task.start_at.strftime('%M/%d/%y %H:%M') if task.start_at} to:#{task.end_at.strftime('%M/%d/%y %H:%M') if task.end_at}"
+        puts "Name: #{task.name} elapsed time: #{task.duration} #{'[ACTIVE]' if task.active}"
       end
     end
 
@@ -63,7 +63,7 @@ module Rtt
     #
     # pause
     def pause
-      current_task.stop if current_task
+      current_task.pause if current_task
     end
     
     #
@@ -94,7 +94,7 @@ module Rtt
     # start 'new_task'
     # TODO: Make it start PAUSED TASKS!
     def start(task_name = nil)
-      current_task.stop if current_task.present? 
+      current_task.stop if current_task.present? && task_name.present?
       Task::task(task_name).start
     end
 
