@@ -59,6 +59,11 @@ module Rtt
             command.optional = arguments if arguments.present?
             Array(command)
           end
+        else
+          command = StartCommand.new
+          command.name = arguments.shift
+          command.optional = arguments if arguments.present?
+          Array(command)
         end
       end
     end
