@@ -16,6 +16,30 @@ module Rtt
       'Duration' => Proc.new { |task| task.duration }
     }
 
+    def fill_user_information(pdf)
+      pdf.cell [330, 790],
+          :text => current_user.full_name_and_nickname,
+          :width => 225, :padding => 10, :border_width => 0, :align => :right
+      pdf.cell [330, 770],
+          :text => current_user.company,
+          :width => 225, :padding => 10, :border_width => 0, :align => :right
+      pdf.cell [330, 750],
+          :text => current_user.location,
+          :width => 225, :padding => 10, :border_width => 0, :align => :right
+      pdf.cell [330, 730],
+          :text => current_user.address,
+          :width => 225, :padding => 10, :border_width => 0, :align => :right
+      pdf.cell [330, 710],
+          :text => current_user.phone,
+          :width => 225, :padding => 10, :border_width => 0, :align => :right
+      pdf.cell [330, 690],
+          :text => current_user.email,
+          :width => 225, :padding => 10, :border_width => 0, :align => :right
+      pdf.cell [330, 670],
+          :text => current_user.site,
+          :width => 225, :padding => 10, :border_width => 0, :align => :right
+    end
+
     def fixed_fields_for_current_data
       @fixed_fields_for_current_data ||= begin
         calculate_fixed_fields_based_on_data
@@ -82,8 +106,8 @@ module Rtt
       require "prawn/measurement_extensions"
 
       columns = REPORT_FIELDS - fixed_fields_for_current_data
-      
       data = @data[:rows].map { |task| task_row_for_fields(task, columns) }
+      
       
       total_h, total_m = calculate_total_hours_and_minutes(data)
       report_generator = self
@@ -95,27 +119,7 @@ module Rtt
                      :bottom_margin => 0.01.m, # well
                      :page_size => 'A4') do
 
-        cell [330, 790],
-          :text => report_generator.current_user.full_name_and_nickname,
-          :width => 225, :padding => 10, :border_width => 0, :align => :right
-        cell [330, 770],
-          :text => report_generator.current_user.company,
-          :width => 225, :padding => 10, :border_width => 0, :align => :right
-        cell [330, 750],
-          :text => report_generator.current_user.location,
-          :width => 225, :padding => 10, :border_width => 0, :align => :right
-        cell [330, 730],
-          :text => report_generator.current_user.address,
-          :width => 225, :padding => 10, :border_width => 0, :align => :right
-        cell [330, 710],
-          :text => report_generator.current_user.phone,
-          :width => 225, :padding => 10, :border_width => 0, :align => :right
-        cell [330, 690],
-          :text => report_generator.current_user.email,
-          :width => 225, :padding => 10, :border_width => 0, :align => :right
-        cell [330, 670],
-          :text => report_generator.current_user.site,
-          :width => 225, :padding => 10, :border_width => 0, :align => :right
+        report_generator.fill_user_information(self)
 
         move_up 140
         font_size 16
