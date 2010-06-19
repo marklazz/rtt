@@ -10,7 +10,7 @@ module Rtt
     NUMBER_OF_PARAM_REQUIRED = 1
   end
   class SetUserCommand < Command
-    NUMBER_OF_PARAM_REQUIRED = 10
+    NUMBER_OF_PARAM_REQUIRED = 0
   end
   class SetClientCommand < Command
     NUMBER_OF_PARAM_REQUIRED = 1
@@ -104,7 +104,7 @@ module Rtt
         when QueryCommand
           list(env_filters)
         when SetUserCommand
-          set_user(cmd.name, *cmd.optional)
+          set_user
         else
           raise CommandNotFoundError
       end

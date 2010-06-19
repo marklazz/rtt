@@ -3,13 +3,12 @@ module Rtt
   class User
     include DataMapper::Resource
 
-    DEFAULT_LOGIN = 'admin'
+    DEFAULT_NICK = 'admin'
 
     property :id, Serial
-    property :login, String, :required => true, :unique => true, :default => DEFAULT_LOGIN
+    property :nickname, String, :required => true, :unique => true, :default => DEFAULT_NICK
     property :first_name, String
     property :last_name, String
-    property :nickname, String
     property :company, String
     property :address, String
     property :city, String

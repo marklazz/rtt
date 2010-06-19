@@ -1,5 +1,5 @@
 #!/usr/bin/ruby -w
-%w( rubygems spec dm-core dm-validations dm-migrations active_support).each { |lib| require lib }
+%w( rubygems spec dm-core dm-validations dm-migrations active_support highline/import).each { |lib| require lib }
 Dir[File.expand_path(File.join(File.dirname(__FILE__), 'rtt', '*'))].each { |lib| require lib; }
 
 module Rtt
@@ -19,9 +19,10 @@ module Rtt
       User.first :active => true
     end
 
-    def set_user nickname, first_name, last_name, company, email, country, city, address, phone, site
+    def set_user
       deactivate_current_user if current_user
-      User.first_or_create :nickname => nickname, :first_name => first_name, :last_name => last_name, :company => company, :email => email, :address => address, :country => country, :city => city, :phone => phone, :site => site, :active => true
+      extend(UserConfigurator)
+      configure_user
     end
 
     # Change the name of the current task.
