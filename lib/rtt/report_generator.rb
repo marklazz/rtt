@@ -59,8 +59,8 @@ module Rtt
       entered_filename = output_path || DEFAULT_FILENAME
       filename, directory, extension = File.basename(entered_filename), File.dirname(entered_filename), File.extname(entered_filename)
       path = directory.present? && directory != '.' && File.exists?(directory) ? directory : ENV['HOME']
-      ext = extension.present? ? extension : 'pdf'
-      "#{File.join(path, filename)}.#{ext}"
+      ext = extension.present? ? '' : '.pdf'
+      "#{File.join(path, filename)}#{ext}"
     end
 
     #

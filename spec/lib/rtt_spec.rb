@@ -173,8 +173,8 @@ describe Rtt do
   describe '#report' do
 
     it 'should call report_for_csv when :pdf is recevied' do
-      Rtt.should_receive(:report_to_pdf).with('/somepath')
-      Rtt.report :pdf => '/somepath'
+      Rtt.should_receive(:report_to_pdf).with('/somepath.pdf')
+      Rtt.report :pdf => '/somepath.pdf'
     end
 
     it 'should call report_for_csv when :csv is recevied' do
