@@ -65,6 +65,8 @@ module Rtt
           command.optional = arguments if arguments.present?
           Array(command)
         end
+      else
+        puts_usage
       end
     end
 

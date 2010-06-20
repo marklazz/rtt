@@ -6,6 +6,7 @@ USAGE.txt
 bin/rtt
 db/rtt.sqlite3
 db/test.sqlite3
+db/test.sqlite3-journal
 init.sh
 lib/rtt.rb
 lib/rtt/client.rb
