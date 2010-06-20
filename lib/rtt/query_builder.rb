@@ -8,7 +8,7 @@ module Rtt
       Task.all(rtt_build_conditions(options))
     end
 
-    #private
+    private
 
     def rtt_build_conditions options
       conditions = {}
