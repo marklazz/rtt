@@ -5,9 +5,6 @@ Rakefile
 USAGE.txt
 bin/rtt
 db/rtt.sqlite3
-db/test.sqlite3
-db/test.sqlite3-journal
-init.sh
 lib/rtt.rb
 lib/rtt/client.rb
 lib/rtt/cmd_line_interpreter.rb
@@ -20,9 +17,7 @@ lib/rtt/task.rb
 lib/rtt/user.rb
 lib/rtt/user_configurator.rb
 rtt.gemspec
-rtt_report
 spec/datamapper_spec_helper.rb
 spec/lib/rtt/task_spec.rb
 spec/lib/rtt_spec.rb
 tasks/rtt.rake
-todo.txt

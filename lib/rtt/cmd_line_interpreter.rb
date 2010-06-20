@@ -128,7 +128,7 @@ module Rtt
 
     def puts_usage
       puts
-      File.open("USAGE.txt") do |file|
+      File.open(File.join( File.dirname(__FILE__), '..', '..', "USAGE.txt")) do |file|
         while content = file.gets
           puts content
         end
