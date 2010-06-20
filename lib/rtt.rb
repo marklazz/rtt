@@ -1,5 +1,5 @@
 #!/usr/bin/ruby -w
-%w( rubygems spec dm-core dm-validations dm-migrations active_support highline/import).each { |lib| require lib }
+%w( rubygems dm-core dm-validations dm-migrations active_support highline/import).each { |lib| require lib }
 Dir[File.expand_path(File.join(File.dirname(__FILE__), 'rtt', '*'))].each { |lib| require lib; }
 
 module Rtt
