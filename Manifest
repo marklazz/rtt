@@ -5,6 +5,7 @@ Rakefile
 USAGE.txt
 bin/rtt
 db/rtt.sqlite3
+db/test.sqlite3
 init.sh
 lib/rtt.rb
 lib/rtt/client.rb
