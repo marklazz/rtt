@@ -9,12 +9,16 @@ module Rtt
     REPORT_FIELDS = %w(Client Project Name Date Duration)
     FIXED_FIELDS = %w(Client Project)
     REPORT_FIELD_OUTPUT = {
-      'Client' => Proc.new { |task| task.client.name },
-      'Project' => Proc.new { |task| task.project.name },
-      'Name' => Proc.new { |task| task.name },
-      'Date' => Proc.new { |task| task.date.strftime('%m-%d-%y') },
-      'Duration' => Proc.new { |task| task.duration }
+      'Client' => Proc.new { |task| (task.client.name) if task.present? && task.client.present? },
+      'Project' => Proc.new { |task| (task.project.name) if task.present? && task.project.present? },
+      'Name' => Proc.new { |task| task.name if task.present? },
+      'Date' => Proc.new { |task| task.date.strftime('%m-%d-%y') if task.present? },
+      'Duration' => Proc.new { |task| task.duration if task.present? }
     }
+
+    def custom_user_is_defined?
+      current_user.present? && current_user.nickname != Rtt::User::DEFAULT_NICK
+    end
 
     def fill_user_information(pdf)
       pdf.cell [330, 790],
@@ -61,6 +65,12 @@ module Rtt
       path = directory.present? && directory != '.' && File.exists?(directory) ? directory : ENV['HOME']
       ext = extension.present? ? '' : '.pdf'
       "#{File.join(path, filename)}#{ext}"
+    end
+
+    def has_default_value?(field)
+      task = self.data[:rows].first
+      return true if task.nil?
+      REPORT_FIELD_OUTPUT[field].call(task) == eval("Rtt::#{field}::DEFAULT_NAME")
     end
 
     #
@@ -128,53 +138,34 @@ module Rtt
                      :bottom_margin => 0.01.m, # well
                      :page_size => 'A4') do
 
-        report_generator.fill_user_information(self)
+        report_generator.fill_user_information(self) if report_generator.custom_user_is_defined?
 
-        move_up 140
+        move_up(140) if report_generator.custom_user_is_defined?
         font_size 16
         text "RTT Report"
         text "=========="
         move_down 40
 
-
-#        text report_generator.current_user.full_name_and_nickname, :align => :right
-        #text report_generator.current_user.company, :align => :right
-        #text report_generator.current_user.email, :align => :right
-        #text report_generator.current_user.address, :align => :right
-        #text report_generator.current_user.location, :align => :right
-        #text report_generator.current_user.phone, :align => :right
-        #text report_generator.current_user.site, :align => :right
-
         report_generator.fixed_fields_for_current_data.each do |field|
-          text "#{field}: #{report_generator.fixed_value(field)}"
+          text("#{field}: #{report_generator.fixed_value(field)}") unless report_generator.has_default_value?(field)
         end
 
-        move_down 50
+        move_down(report_generator.custom_user_is_defined? ? 40 : 0)
 
         if data.present?
             table data,
               :headers => columns,
-              #:position => :center,
               :position => :left,
               :border_width   => 1,
               :row_colors => [ 'fafafa', 'f0f0f0' ],
               :font_size => 12,
               :padding => 5,
               :align => :left
-              #:width =>  535
-              #:column_widths => { 1=> 50, 2 => 40, 3 => 30}
         end
 
         move_down 20
         text "Total: #{total_h}h#{total_m}m"
-        
-        # footer
-#        page_count.times do |i|
-            #go_to_page(i+1)
-            #lazy_bounding_box([bounds.right-50, bounds.bottom + 25], :width => 50) {
-                #text "#{i+1} / #{page_count}"
-            #}.draw
-        #end
+
         number_pages "Page <page> / <total>", [bounds.right - 80, 0]
         render_file output_path
       end
