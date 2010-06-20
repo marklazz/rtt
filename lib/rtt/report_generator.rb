@@ -55,6 +55,14 @@ module Rtt
       end
     end
 
+    def full_path(output_path = nil)
+      entered_filename = output_path || DEFAULT_FILENAME
+      filename, directory, extension = File.basename(entered_filename), File.dirname(entered_filename), File.extname(entered_filename)
+      path = directory.present? && directory != '.' && File.exists?(directory) ? directory : ENV['HOME']
+      ext = extension.present? ? extension : 'pdf'
+      "#{File.join(path, filename)}.#{ext}"
+    end
+
     #
     #
     def report options = {}
@@ -65,9 +73,10 @@ module Rtt
       fixed_fields = extract_fixed_fields(options)
       fixed_fields_and_values = fixed_fields.inject({}) { |hash, key| hash[key] = options[key.downcase.to_sym]; hash }
       @data = { :fixed_fields => fixed_fields_and_values, :rows => query(options) }
+      filename_path = full_path(path)
       case extension
         when :pdf
-          report_to_pdf path
+          report_to_pdf filename_path
         when :csv
           raise 'CSV format report not implemented yet'
           report_to_csv path
@@ -142,17 +151,19 @@ module Rtt
 
         move_down 50
 
-        table data,
-          :headers => columns,
-          #:position => :center,
-          :position => :left,
-          :border_width   => 1,
-          :row_colors => [ 'fafafa', 'f0f0f0' ],
-          :font_size => 12,
-          :padding => 5,
-          :align => :left
-          #:width =>  535
-          #:column_widths => { 1=> 50, 2 => 40, 3 => 30}
+        if data.present?
+            table data,
+              :headers => columns,
+              #:position => :center,
+              :position => :left,
+              :border_width   => 1,
+              :row_colors => [ 'fafafa', 'f0f0f0' ],
+              :font_size => 12,
+              :padding => 5,
+              :align => :left
+              #:width =>  535
+              #:column_widths => { 1=> 50, 2 => 40, 3 => 30}
+        end
 
         move_down 20
         text "Total: #{total_h}h#{total_m}m"
@@ -165,11 +176,12 @@ module Rtt
             #}.draw
         #end
         number_pages "Page <page> / <total>", [bounds.right - 80, 0]
-
-        render_file(output_path || DEFAULT_FILENAME)
+        render_file output_path
       end
     rescue LoadError
       puts "Missing gem: prawn, prawn/layout or prawn/measurement_extensions"
+    rescue => e
+      puts "[rtt] Error while generating report: #{e.to_s}"
     end
 
     def calculate_fixed_fields_based_on_data
