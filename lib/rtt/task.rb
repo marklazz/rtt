@@ -31,7 +31,6 @@ module Rtt
           Task.create(base_attributes)
         end
       elsif (existing_task = Task.first base_attributes.merge({:start_at.gte => Date.today.beginning_of_day})).present?
-        puts existing_task.accumulated_spent_time
         existing_task
       else
         Task.create(base_attributes)
