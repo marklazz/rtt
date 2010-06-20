@@ -111,7 +111,7 @@ module Rtt
         when QueryCommand
           list(env_filters)
         when SetUserCommand
-          set_user(cmd.name)
+          set_user(cmd.name, cmd.optional.present? && cmd.optional.first == '--configure')
         else
           raise CommandNotFoundError
       end

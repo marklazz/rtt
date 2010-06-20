@@ -4,7 +4,7 @@ module Rtt
     include DataMapper::Resource
 
     BLANK_FIELD = ''
-    DEFAULT_NICK = 'admin'
+    DEFAULT_NICK = 'Default user'
 
     property :id, Serial
     property :nickname, String, :required => true, :unique => true, :default => DEFAULT_NICK

@@ -19,13 +19,18 @@ module Rtt
       User.first :active => true
     end
 
-    def set_user(nickname = nil)
+    def set_user(nickname = nil, configure = false)
+      user = if nickname.blank?
+               current_user
+             else
+               User.first(:nickname => nickname)
+      end
       current_user.deactivate if current_user
-      if nickname && (user = User.first(:nickname => nickname)).present?
-        user.activate
-      else
+      if user.blank? || configure
         extend(UserConfigurator)
         configure_user(nickname)
+      else
+        user.activate
       end
     end
 

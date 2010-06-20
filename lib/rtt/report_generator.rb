@@ -126,8 +126,7 @@ module Rtt
       require "prawn/measurement_extensions"
       columns = REPORT_FIELDS - fixed_fields_for_current_data
       data = @data[:rows].map { |task| task_row_for_fields(task, columns) }
-     
-      
+
       total_h, total_m = calculate_total_hours_and_minutes(data)
       report_generator = self
 
