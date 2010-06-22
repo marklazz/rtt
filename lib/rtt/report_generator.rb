@@ -166,6 +166,7 @@ module Rtt
         text "Total: #{total_h}h#{total_m}m"
 
         number_pages "Page <page> / <total>", [bounds.right - 80, 0]
+        puts "Report saved at #{output_path}"
         render_file output_path
       end
     rescue LoadError
