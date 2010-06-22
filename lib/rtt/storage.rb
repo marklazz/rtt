@@ -3,7 +3,7 @@ module Rtt
   module Storage
 
     def init(database = :rtt)
-      DataMapper.setup(:default, {:adapter => "sqlite3", :database => File.join( File.dirname(__FILE__), '..', '..', "db/#{database.to_s}.sqlite3") })
+      DataMapper.setup(:default, {:adapter => "sqlite3", :database => File.join( File.dirname(__FILE__), '..', '..', 'db', "#{database.to_s}.sqlite3") })
       migrate unless missing_tables
       #DataObjects::Sqlite3.logger = DataMapper::Logger.new(File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'log', 'sqlite3.log')), 0)
     end
