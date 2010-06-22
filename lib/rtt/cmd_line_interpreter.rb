@@ -2,18 +2,22 @@
 module Rtt
   class Command
     attr_accessor :name, :optional
+
+    def configure?
+      self.optional.present? && self.optional.first == '--configure'
+    end
   end
   class PauseCommand < Command
     NUMBER_OF_PARAM_REQUIRED = 0
   end
   class SetProjectCommand < Command
-    NUMBER_OF_PARAM_REQUIRED = 1
+    NUMBER_OF_PARAM_REQUIRED = 0
   end
   class SetUserCommand < Command
     NUMBER_OF_PARAM_REQUIRED = 0
   end
   class SetClientCommand < Command
-    NUMBER_OF_PARAM_REQUIRED = 1
+    NUMBER_OF_PARAM_REQUIRED = 0
   end
   class StartCommand < Command
     NUMBER_OF_PARAM_REQUIRED = 0
@@ -32,6 +36,7 @@ module Rtt
   end
   class CommandNotFoundError < StandardError; end
   class TaskNotStartedError < StandardError; end
+  class ParametersNotMatchCommandSignatureError < StandardError; end
 
   module CmdLineInterpreter
 
@@ -55,8 +60,14 @@ module Rtt
           klazz = COMMAND_MAPPING[operation]
           if arguments.length >= klazz::NUMBER_OF_PARAM_REQUIRED
             command = klazz.new
-            command.name = arguments.shift
-            command.optional = arguments if arguments.present?
+            first_argument = arguments.shift
+            if /^--.*$/.match(first_argument)
+              command.name = nil
+              command.optional = [first_argument]
+            else
+              command.name = first_argument
+              command.optional = arguments if arguments.present?
+            end
             Array(command)
           end
         elsif operation.present?
@@ -91,10 +102,10 @@ module Rtt
     def execute_single(cmd)
       case cmd
         when SetProjectCommand
-          client = cmd.optional if cmd.optional.present?
-          set_project(cmd.name, client)
+          client = cmd.optional.shift if cmd.optional.present? && (/^--.*$/.match(cmd.optional.first)).blank?
+          set_project(cmd.name, client, cmd.configure?)
         when SetClientCommand
-          set_client(cmd.name)
+          set_client(cmd.name, cmd.configure?)
         when StartCommand
           start(cmd.name)
         when PauseCommand
@@ -111,7 +122,7 @@ module Rtt
         when QueryCommand
           list(env_filters)
         when SetUserCommand
-          set_user(cmd.name, cmd.optional.present? && cmd.optional.first == '--configure')
+          set_user(cmd.name, cmd.configure?)
         else
           raise CommandNotFoundError
       end

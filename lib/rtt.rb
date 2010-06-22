@@ -27,7 +27,7 @@ module Rtt
       end
       current_user.deactivate if current_user
       if user.blank? || configure
-        extend(UserConfigurator)
+        extend(InteractiveConfigurator)
         configure_user(nickname)
       else
         user.activate
@@ -77,17 +77,31 @@ module Rtt
     # Usage
     #
     # set_client name
-    def set_client name
-      deactivate_current_client if current_client
-      client = client(name)
-      client.activate
+    def set_client(name = nil, configure = false)
+      if name.blank? || configure
+        extend(InteractiveConfigurator)
+        client = name.blank? ? current_client : Client.first(:name => name)
+        configure_client(client)
+      else
+        raise ParametersNotMatchCommandSignatureError if name.blank?
+        deactivate_current_client if current_client
+        client = client(name)
+        client.activate
+      end
     end
 
-    def set_project project_name, client_name = nil
-      deactivate_current_project if current_project
-      client = client(client_name) unless client_name.nil?
-      project = Project.first_or_create :name => project_name, :description => project_name
-      project.activate_with_client(client)
+    def set_project(project_name = nil, client_name = nil, configure = false)
+      if project_name.blank? || configure
+        extend(InteractiveConfigurator)
+        project = project_name.blank? ? current_project : Project.first(:name => project_name)
+        configure_project(project)
+      else
+        raise ParametersNotMatchCommandSignatureError if project_name.blank?
+        deactivate_current_project if current_project
+        client = client(client_name) unless client_name.nil?
+        project = Project.first_or_create :name => project_name, :description => project_name, :client => client
+        project.activate
+      end
     end
 
     # Starts a new timer. It stops the current task if there is any.
