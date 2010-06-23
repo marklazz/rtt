@@ -10,6 +10,7 @@ module Rtt
     property :name, String, :required => true, :unique => true, :default => DEFAULT_NAME
     property :description, String, :default => DEFAULT_DESCRIPTION
     property :active, Boolean, :default => false
+    property :rate, Float
 
     has n, :tasks #, :through => Resource
     has n, :users, :through => :tasks
@@ -17,7 +18,7 @@ module Rtt
 
     before :valid?, :set_default_client
 
-    before :save do |project|
+    before :create do |project|
       project.active = true if Project.all.length == 0
       true
     end
@@ -35,8 +36,10 @@ module Rtt
 
     def deactivate_all
       Project.all.each do |project|
-        project.active = false
-        project.save
+        if project.id != self.id
+          project.active = false
+          project.save
+        end
       end
     end
 

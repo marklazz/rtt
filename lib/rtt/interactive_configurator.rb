@@ -20,6 +20,7 @@ module Rtt
       say "Please fill in your Project information"
       say "======================================="
       project_name = ask("Project name:") { |q| q.validate = /^\w+$/ }
+      rate = ask("Project rate:") { |q| q.validate = /^[\d]+(\.[\d]+){0,1}$/ }
       client_found = false
       while !client_found
         client_name = ask("Client name:") { |q| q.validate = /^\w+$/ }
@@ -41,6 +42,7 @@ module Rtt
       project.name = project_name
       project.description = project_name
       project.client = client
+      project.rate = rate
       project.save
       if !project.active && agree("Make this project current ?")
         project.activate

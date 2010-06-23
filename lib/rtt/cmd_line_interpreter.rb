@@ -7,6 +7,9 @@ module Rtt
       self.optional.present? && self.optional.first == '--configure'
     end
   end
+  class DeleteCommand < Command
+    NUMBER_OF_PARAM_REQUIRED = 0
+  end
   class PauseCommand < Command
     NUMBER_OF_PARAM_REQUIRED = 0
   end
@@ -50,7 +53,8 @@ module Rtt
      :list => QueryCommand,
      :pause => PauseCommand,
      :resume => StartCommand,
-     :user => SetUserCommand
+     :user => SetUserCommand,
+     :delete => DeleteCommand
     }
 
     def capture(arguments)
@@ -108,6 +112,8 @@ module Rtt
           set_client(cmd.name, cmd.configure?)
         when StartCommand
           start(cmd.name)
+        when RenameCommand
+          rename(cmd.name)
         when PauseCommand
           if current_task.present?
               pause
@@ -123,6 +129,8 @@ module Rtt
           list(env_filters)
         when SetUserCommand
           set_user(cmd.name, cmd.configure?)
+        when DeleteCommand
+          delete_task
         else
           raise CommandNotFoundError
       end

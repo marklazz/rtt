@@ -6,14 +6,15 @@ module Rtt
 
     DEFAULT_FILENAME = 'rtt_report'
     FORMATS_ACCEPTED = [ :csv, :pdf ]
-    REPORT_FIELDS = %w(Client Project Name Date Duration)
+    REPORT_FIELDS = %w(Client Project Name Date Rate Duration)
     FIXED_FIELDS = %w(Client Project)
     REPORT_FIELD_OUTPUT = {
-      'Client' => Proc.new { |task| (task.client.name) if task.present? && task.client.present? },
-      'Project' => Proc.new { |task| (task.project.name) if task.present? && task.project.present? },
-      'Name' => Proc.new { |task| task.name if task.present? },
-      'Date' => Proc.new { |task| task.date.strftime('%m-%d-%y') if task.present? },
-      'Duration' => Proc.new { |task| task.duration if task.present? }
+      'Client' => Proc.new { |task| (task.client.name) if task.client.present? },
+      'Project' => Proc.new { |task| (task.project.name) if task.project.present? },
+      'Name' => Proc.new { |task| task.name },
+      'Date' => Proc.new { |task| task.date.strftime('%m-%d-%y') },
+      'Rate' => Proc.new { |task| task.rate },
+      'Duration' => Proc.new { |task| task.duration }
     }
 
     def custom_user_is_defined?
@@ -70,7 +71,7 @@ module Rtt
     def has_default_value?(field)
       task = self.data[:rows].first
       return true if task.nil?
-      REPORT_FIELD_OUTPUT[field].call(task) == eval("Rtt::#{field}::DEFAULT_NAME")
+      (REPORT_FIELD_OUTPUT[field].call(task) if task.present?) == eval("Rtt::#{field}::DEFAULT_NAME")
     end
 
     #
@@ -98,14 +99,20 @@ module Rtt
 
     private
 
-    def calculate_total_hours_and_minutes(data)
-      data.inject([0, 0]) do |totals, task|
-        total_h, total_m = totals
-        if task[4 - fixed_fields_for_current_data.length].match(/^(\d+)h(\d+)m$/)
+    def amount(rate, h, m)
+      rate.to_f * (h.to_f + (m.to_f / 60))
+    end
+
+    def calculate_total_amount_hours_and_minutes(data)
+      data.inject([0, 0, 0]) do |totals, task|
+        total_a, total_h, total_m = totals
+        if task[5 - fixed_fields_for_current_data.length].to_s.match(/^(\d+)h(\d+)m$/)
           total_m += ($2.to_i % 60)
           total_h += ($1.to_i + $2.to_i / 60)
+          rate = task[4 - fixed_fields_for_current_data.length]
+          total_a += amount(rate, total_h, total_m)
         end
-        [ total_h, total_m ]
+        [ total_a, total_h, total_m ]
       end
     end
 
@@ -126,8 +133,8 @@ module Rtt
       require "prawn/measurement_extensions"
       columns = REPORT_FIELDS - fixed_fields_for_current_data
       data = @data[:rows].map { |task| task_row_for_fields(task, columns) }
-
-      total_h, total_m = calculate_total_hours_and_minutes(data)
+      title = ENV['title'] || ENV['TITLE'] || "RTT Report"
+      total_amount, total_h, total_m = calculate_total_amount_hours_and_minutes(data)
       report_generator = self
 
       pdf = Prawn::Document.new(:page_layout => :portrait,
@@ -141,8 +148,8 @@ module Rtt
 
         move_up(140) if report_generator.custom_user_is_defined?
         font_size 16
-        text "RTT Report"
-        text "=========="
+        text(title)
+        text("=" * title.length)
         move_down 40
 
         report_generator.fixed_fields_for_current_data.each do |field|
@@ -163,7 +170,10 @@ module Rtt
         end
 
         move_down 20
-        text "Total: #{total_h}h#{total_m}m"
+        text "Total time: #{total_h}h#{total_m}m"
+        move_down 10
+        text "Total costs: #{total_amount}"
+        move_down 10
 
         number_pages "Page <page> / <total>", [bounds.right - 80, 0]
         puts "Report saved at #{output_path}"
@@ -186,7 +196,7 @@ module Rtt
 
     def task_row_for_fields(task, fields)
       fields.map do |field|
-        REPORT_FIELD_OUTPUT[field].call(task)
+        REPORT_FIELD_OUTPUT[field].call(task) if task.present?
       end
     end
   end

@@ -19,6 +19,10 @@ module Rtt
       User.first :active => true
     end
 
+    def delete_task
+      current_task.destroy if current_task
+    end
+
     def set_user(nickname = nil, configure = false)
       user = if nickname.blank?
                current_user
@@ -57,7 +61,7 @@ module Rtt
       puts 'Task List'
       puts '========='
       query(options).each do |task|
-        puts "Name: #{task.name} elapsed time: #{task.duration} #{'[ACTIVE]' if task.active}"
+        puts "Name: #{task.name} || Project: #{task.project.name} || Elapsed time: #{task.duration} #{'[ACTIVE]' if task.active}"
       end
     end
 
@@ -86,7 +90,11 @@ module Rtt
         raise ParametersNotMatchCommandSignatureError if name.blank?
         deactivate_current_client if current_client
         client = client(name)
-        client.activate
+        unless client.active
+          client.activate
+        else
+          client.save
+        end
       end
     end
 
@@ -99,8 +107,14 @@ module Rtt
         raise ParametersNotMatchCommandSignatureError if project_name.blank?
         deactivate_current_project if current_project
         client = client(client_name) unless client_name.nil?
-        project = Project.first_or_create :name => project_name, :description => project_name, :client => client
-        project.activate
+        project = Project.first_or_create :name => project_name
+        project.client = client
+        project.description = project_name
+        unless project.active
+          project.activate
+        else
+          project.save
+        end
       end
     end
 
@@ -123,6 +137,18 @@ module Rtt
       current_task.stop if current_task
     end
 
+    def current_client
+      Client.first :active => true
+    end
+
+    def current_project
+      Project.first :active => true
+    end
+
+    def current_task
+      Task.first :active => true
+    end
+
     private
 
     def client(name)
@@ -139,18 +165,6 @@ module Rtt
       project = current_project
       project.active = false
       project.save
-    end
-
-    def current_client
-      Client.first :active => true
-    end
-
-    def current_project
-      Project.first :active => true
-    end
-
-    def current_task
-      Task.first :active => true
     end
   end
 end
