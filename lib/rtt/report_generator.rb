@@ -150,7 +150,11 @@ module Rtt
         font_size 16
         text(title)
         text("=" * title.length)
-        move_down 40
+        move_down 10
+        font_size(13)
+        text("Date: #{Date.today.strftime("%m-%d-%y")}")
+        font_size 16
+        move_down 30
 
         report_generator.fixed_fields_for_current_data.each do |field|
           text("#{field}: #{report_generator.fixed_value(field)}") unless report_generator.has_default_value?(field)

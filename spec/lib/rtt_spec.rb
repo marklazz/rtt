@@ -52,7 +52,7 @@ describe Rtt do
     describe 'when there is a current task' do
 
       before do
-        @current_task = Rtt::Task.create :name => 'older_task', :start_at => Date.today.beginning_of_day, :active => true
+        @current_task = Rtt::Task.create :name => 'older_task', :start_at => Date.today.beginning_of_day, :active => true, :rate => 100
       end
 
       it 'should create a new task' do
@@ -116,7 +116,7 @@ describe Rtt do
     describe 'when there is a current task' do
 
       before do
-        Rtt::Task.create :name => 'older_task', :start_at => Date.today.beginning_of_day, :active => true
+        Rtt::Task.create :name => 'older_task', :start_at => Date.today.beginning_of_day, :active => true, :rate => 100
       end
 
       it 'should finish the task' do
@@ -145,7 +145,7 @@ describe Rtt do
     describe 'When there is a current task' do
 
       before do
-        @current_task = Rtt::Task.create :name => 'older_task', :start_at => Date.today.beginning_of_day, :active => true
+        @current_task = Rtt::Task.create :name => 'older_task', :start_at => Date.today.beginning_of_day, :active => true, :rate => 100
       end
 
       it 'should change the name' do

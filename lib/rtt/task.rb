@@ -22,7 +22,7 @@ module Rtt
     before :valid?, :set_default_user
 
     def self.task(task_name)
-      base_attributes = { :name => task_name, :user => Rtt.current_user, :date => Date.today, :rate => Rtt.current_project.rate }
+      base_attributes = { :name => task_name, :user => Rtt.current_user, :date => Date.today, :rate => (Rtt.current_project.rate if Rtt.current_project.present?) }
       if task_name.nil?
         existing_task = Task.first :active => true
         if existing_task
