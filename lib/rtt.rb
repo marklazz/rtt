@@ -58,10 +58,10 @@ module Rtt
     #   Rtt.list :from => '2010-5-3', :to => '2010-5-20'
     #
     def list options = {}
-      puts 'Task List'
-      puts '========='
+      say 'Task List'
+      say '========='
       query(options).each do |task|
-        puts "Name: #{task.name} || Project: #{task.project.name} || Elapsed time: #{task.duration} #{'[ACTIVE]' if task.active}"
+        say "Name: #{task.name} || Project: #{task.project.name} || Elapsed time: #{task.duration} #{'[ACTIVE]' if task.active}"
       end
     end
 

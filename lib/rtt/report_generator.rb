@@ -124,7 +124,7 @@ module Rtt
     def report_to_csv output_path
       require 'fastercsv'
     rescue LoadError
-      puts "Missing gem: Fastercsv"
+      say "Missing gem: Fastercsv"
     end
 
      def report_to_pdf output_path
@@ -176,17 +176,17 @@ module Rtt
         move_down 20
         text "Total time: #{total_h}h#{total_m}m"
         move_down 10
-        text "Total costs: #{total_amount}"
+        text "Total costs: $#{sprintf('%.1f', total_amount)}"
         move_down 10
 
         number_pages "Page <page> / <total>", [bounds.right - 80, 0]
-        puts "Report saved at #{output_path}"
+        say "Report saved at #{output_path}"
         render_file output_path
       end
     rescue LoadError
-      puts "Missing gem: prawn, prawn/layout or prawn/measurement_extensions"
+      say "Missing gem: prawn, prawn/layout or prawn/measurement_extensions"
     rescue => e
-      puts "[rtt] Error while generating report: #{e.to_s}"
+      say "Error while generating report: #{e.to_s}"
     end
 
     def calculate_fixed_fields_based_on_data

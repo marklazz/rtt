@@ -67,5 +67,25 @@ module Rtt
       site = ask('Site:')
       User.first_or_create :nickname => nickname, :first_name => first_name, :last_name => last_name, :company => company, :email => email, :address => address, :country => country, :city => city, :phone => phone, :site => site, :active => true
     end
+
+    def configure_task(name = nil)
+      task = name.blank? ? Task.first(:active => true) : Task.first(:name => name)
+      if task.present?
+        say "Modify the task information (with name: #{task.name})"
+        say "================================"
+        name = ask("Name:") { |q| q.validate = /^\w+$/ }
+        description = ask("Description:") { |q| q.validate = /^\w+$/ }
+        rate = ask("Rate:") { |q| q.validate = /^[\d]+(\.[\d]+){0,1}$/ }
+        task.rate = rate.to_f
+        task.name = name
+        task.description = description
+        task.save
+        task
+      else
+        name.blank? ?
+          say("There is no active task to configure. Please add the name of task, to this command, to modify it.") :
+          say("There is no task with that name. Please check the available tasks with 'rtt list'.")
+      end
+    end
   end
 end

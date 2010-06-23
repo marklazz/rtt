@@ -3,9 +3,16 @@ module Rtt
   class Command
     attr_accessor :name, :optional
 
+    def next_optional
+      optional.shift if optional.present?
+    end
+
     def configure?
       self.optional.present? && self.optional.first == '--configure'
     end
+  end
+  class ConfigureCommand < Command
+    NUMBER_OF_PARAM_REQUIRED = 1
   end
   class DeleteCommand < Command
     NUMBER_OF_PARAM_REQUIRED = 0
@@ -54,7 +61,8 @@ module Rtt
      :pause => PauseCommand,
      :resume => StartCommand,
      :user => SetUserCommand,
-     :delete => DeleteCommand
+     :delete => DeleteCommand,
+     :configure => ConfigureCommand
     }
 
     def capture(arguments)
@@ -98,7 +106,7 @@ module Rtt
 
     def execute(cmds)
       cmds.each { |cmd| execute_single(cmd) }
-      puts "Operation(s) succeded."
+      say "Operation(s) succeded."
     rescue => e
       handle_error(e)
     end
@@ -131,6 +139,20 @@ module Rtt
           set_user(cmd.name, cmd.configure?)
         when DeleteCommand
           delete_task
+        when ConfigureCommand
+          case cmd.name.downcase
+            when 'task'
+              configure_task(cmd.next_optional)
+            when 'project'
+              name = cmd.next_optional
+              client = cmd.next_optional
+              set_project(name, client, true)
+            when 'client'
+              name = cmd.next_optional
+              set_client(name, true)
+            else
+              raise CommandNotFoundError
+          end
         else
           raise CommandNotFoundError
       end
@@ -141,18 +163,18 @@ module Rtt
         when CommandNotFoundError
           return puts_usage
         when TaskNotStartedError
-          puts "There is no active task. Pause is not valid at this point."
+          say "There is no active task. Pause is not valid at this point."
       end
     end
 
     def puts_usage
-      puts
+      say('')
       File.open(File.join( File.dirname(__FILE__), '..', '..', "USAGE.txt")) do |file|
         while content = file.gets
-          puts content
+          say content
         end
       end
-      puts
+      say('')
     end
   end
 end
