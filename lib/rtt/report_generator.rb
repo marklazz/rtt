@@ -17,6 +17,17 @@ module Rtt
       'Duration' => Proc.new { |task| task.duration }
     }
 
+    def column_widths(fixed_fields)
+      case fixed_fields.length
+        when 2
+          { 0 => 360, 1 => 60, 2 => 60, 3 => 60 } # total = 540 px
+        when 1
+          { 0 => 80, 1 => 290, 2 => 60, 3 => 50, 4 => 60 }
+        else
+          { 0 => 80, 1 => 80, 2 => 210, 3 => 60, 4 => 50, 5 => 60 }
+      end
+    end
+
     def custom_user_is_defined?
       current_user.present? && current_user.nickname != Rtt::User::DEFAULT_NICK
     end
@@ -99,21 +110,23 @@ module Rtt
 
     private
 
-    def amount(rate, h, m)
-      rate.to_f * (h.to_f + (m.to_f / 60))
+    def amount(rate, minutes)
+      rate.to_f * (minutes.to_f / 60)
     end
 
     def calculate_total_amount_hours_and_minutes(data)
-      data.inject([0, 0, 0]) do |totals, task|
-        total_a, total_h, total_m = totals
+      total_amount, total_minutes = data.inject([0, 0]) do |totals, task|
+        total_a, total_m = totals
         if task[5 - fixed_fields_for_current_data.length].to_s.match(/^(\d+)h(\d+)m$/)
-          total_m += ($2.to_i % 60)
-          total_h += ($1.to_i + $2.to_i / 60)
+          minutes = $2.to_i
+          minutes += ($1.to_i * 60)
+          total_m += minutes
           rate = task[4 - fixed_fields_for_current_data.length]
-          total_a += amount(rate, total_h, total_m)
+          total_a += amount(rate, minutes)
         end
-        [ total_a, total_h, total_m ]
+        [ total_a, total_m ]
       end
+      [total_amount, total_minutes / 60, total_minutes % 60]
     end
 
     def extract_fixed_fields(options)
@@ -156,21 +169,23 @@ module Rtt
         font_size 16
         move_down 30
 
-        report_generator.fixed_fields_for_current_data.each do |field|
+        fixed_fields = report_generator.fixed_fields_for_current_data
+        fixed_fields.each do |field|
           text("#{field}: #{report_generator.fixed_value(field)}") unless report_generator.has_default_value?(field)
         end
 
-        move_down(report_generator.custom_user_is_defined? ? 40 : 0)
+        move_down(report_generator.custom_user_is_defined? ? 50 : 0)
 
         if data.present?
-            table data,
+            table(data,
               :headers => columns,
               :position => :left,
               :border_width   => 1,
               :row_colors => [ 'fafafa', 'f0f0f0' ],
+              :column_widths => report_generator.column_widths(fixed_fields),
               :font_size => 12,
               :padding => 5,
-              :align => :left
+              :align => :left)
         end
 
         move_down 20

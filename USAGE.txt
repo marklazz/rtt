@@ -1,13 +1,51 @@
+
 RTT is a tool for tracking time. It's primary extend is to be used from command line.
+=====================================================================================
 
 Usage:
 
- rtt start <task-name>
- rtt pause
- rtt stop
- rtt user <nickname>
- rtt client <client-name>
- rtt project <project-name>
- rtt rename <new-name-current-task>
- rtt list
- rtt report <filename>.pdf
+ - rtt start <task-name> | rtt <task-name>
+
+ Starts a new task (or existing task with that name) for the current project/client/user.
+
+ - rtt pause
+
+ Pauses the current task.
+
+ - rtt resume
+
+ Resumes the last paused task.
+
+ - rtt stop
+
+ Stops the current task.
+
+ - rtt user <nickname>
+
+ Changes the current user. If there is no user with the nickname specified it ask for user information interactivly.
+
+ - rtt client <client-name>
+
+ Sets the current client with with name specified (creates one client if there no client stored with that name).
+
+ - rtt project <project-name>
+
+ Sets the current project with the specified name.
+
+ - rtt rename <new-name-current-task>
+
+ Rename current task
+
+ - CLIENT=some_client rtt list | CLIENT=some_client PROJECT=some_project rtt list | PROJECT=some_project rtt list
+
+ List all tasks created for the filters provided.
+
+ - rtt report <filename>
+
+ Generates a report to be stored on on the path specified.
+
+ - rtt configure (client|project|user|task)
+
+ Allows to change properties of current objects.
+
+Enjoy!
