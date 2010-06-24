@@ -15,6 +15,11 @@ module Rtt
     include ReportGenerator
     include Storage
 
+    def update_task(name)
+      extend(InteractiveConfigurator)
+      configure_task(name)
+    end
+
     def current_user
       User.first :active => true
     end

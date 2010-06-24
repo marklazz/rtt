@@ -142,7 +142,7 @@ module Rtt
         when ConfigureCommand
           case cmd.name.downcase
             when 'task'
-              configure_task(cmd.next_optional)
+              update_task(cmd.optional)
             when 'project'
               name = cmd.next_optional
               client = cmd.next_optional

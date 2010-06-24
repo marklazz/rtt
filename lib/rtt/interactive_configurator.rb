@@ -73,12 +73,14 @@ module Rtt
       if task.present?
         say "Modify the task information (with name: #{task.name})"
         say "================================"
-        name = ask("Name:") { |q| q.validate = /^\w+$/ }
-        description = ask("Description:") { |q| q.validate = /^\w+$/ }
+        name = if agree('Want to change name?')
+                ask("Name:") { |q| q.validate = /^\w+$/ }
+               else
+                task.name
+        end
         rate = ask("Rate:") { |q| q.validate = /^[\d]+(\.[\d]+){0,1}$/ }
         task.rate = rate.to_f
         task.name = name
-        task.description = description
         task.save
         task
       else
