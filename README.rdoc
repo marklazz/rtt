@@ -80,6 +80,10 @@ $ PROJECT=SomeProject rtt report
 
 This will generate a report for the project 'SomeProject'.
 
+$ FROM=20-01-2010 TO=25-01-2010 CLIENT=SomeClient rtt report
+
+The output for this command will produce a report only for the task started after 20th of January and before 25th of January and also that were produced for the client called 'SomeClient'.
+
 Questions/Comments
 ------------------
 
