@@ -6,10 +6,6 @@ module Rtt
     def next_optional
       optional.shift if optional.present?
     end
-
-    def configure?
-      self.optional.present? && self.optional.first == '--configure'
-    end
   end
   class ConfigureCommand < Command
     NUMBER_OF_PARAM_REQUIRED = 1
@@ -94,7 +90,7 @@ module Rtt
     end
 
     def env_filters
-      [ 'client', 'project' ].inject({}) do |filters, key|
+      [ 'from', 'to', 'client', 'project' ].inject({}) do |filters, key|
         filters[key.to_sym] = env_variable(key) if env_variable(key).present?
         filters
       end
@@ -115,9 +111,9 @@ module Rtt
       case cmd
         when SetProjectCommand
           client = cmd.optional.shift if cmd.optional.present? && (/^--.*$/.match(cmd.optional.first)).blank?
-          set_project(cmd.name, client, cmd.configure?)
+          set_project(cmd.name, client)
         when SetClientCommand
-          set_client(cmd.name, cmd.configure?)
+          set_client(cmd.name)
         when StartCommand
           start(cmd.name)
         when RenameCommand
@@ -136,7 +132,7 @@ module Rtt
         when QueryCommand
           list(env_filters)
         when SetUserCommand
-          set_user(cmd.name, cmd.configure?)
+          set_user(cmd.name)
         when DeleteCommand
           delete_task
         when ConfigureCommand
