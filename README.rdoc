@@ -10,11 +10,11 @@ If no <task-name> is specified the last paused one is activated, otherwise a tas
 
 Then to stop the timer, you can do:
 
-$ rtt stop
+$ rtt stop | pause | resume (if there is a paused task)
 
 Also, by just typying: 'rtt start', without specifying the task, it would default to the previous task.
 
-If you start a task with the same name as one already stored for the very same day, then the elapsed time for both activities will be sum into just one task.
+If you start a task with the same name as one already stored for the very same day, then both task will be merged (suming the time of each one of those).
 
 Installation
 ------------
@@ -23,11 +23,17 @@ Installation
 
 After installing the gem you will need to setup some basic information of yours (data to be printed in the reports). With the following command:
 
-$ rtt user <user-nick-name>
+$ rtt configure user [<user-nick-name>]
 
 Then you will be prompt for First name, Last name, country, city, e-mail, site, etc. Information that will be used to fill-in the reports. 
 
 The only required field is the Nickname, which identifies the user.
+
+To configure the current Project and Client you can use an analogous command:
+
+$ rtt configure project | rtt configure client
+
+After which, you'll be prompted for the attributes for those models.
 
 How to start a task?
 --------------------
@@ -37,15 +43,17 @@ $ rtt '<task-name>' ( or the more explicit way: 'rtt start <task-name>')
 
 That simple!
 
+Note: This command will create a task for the current configured user, project and client.
+
 More about the API
 ------------------
 
-Task can be grouped in Projects. For that you must set the project before starting the timer, in the following way:
+To change the current project. You can do this:
 
 $ rtt project <project-name>
 ..
 
-Anagolous, you can define a Client for the current project by typing:
+Anagolous, you can change the current Client by typing:
 
 $ rtt client <client-name>
 
