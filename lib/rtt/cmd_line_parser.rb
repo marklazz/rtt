@@ -44,7 +44,7 @@ module Rtt
   class TaskNotStartedError < StandardError; end
   class ParametersNotMatchCommandSignatureError < StandardError; end
 
-  module CmdLineInterpreter
+  module CmdLineParser
 
     COMMAND_MAPPING = {
      :project => SetProjectCommand,

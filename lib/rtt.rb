@@ -10,7 +10,7 @@ module Rtt
 
   class << self
     
-    include CmdLineInterpreter
+    include CmdLineParser
     include QueryBuilder
     include ReportGenerator
     include Storage
