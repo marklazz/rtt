@@ -2,16 +2,27 @@
 module Rtt
   module InteractiveConfigurator
 
-    def configure_client(aclient, skip_name = false)
+    def configure_client(name = nil)
       say "Please fill in your Client information"
       say "======================================"
-      name = skip_name ? aclient.name : ask("Client name:")
+      aclient = if name.blank?
+       if (active_client = Client.first :active => true) && agree_or_enter("Want to modify current")
+         active_client
+       else
+         name = ask("Client name:") { |q| q.validate = /^\w+$/ }
+         Client.create :name => name
+       end
+      else
+        Client.first_or_create :name => name
+      end
       activate = Client.all.length == 0 || agree_or_enter("Make this client current")
       client = aclient.present? ? aclient : Client.create(:name => name)
       client.name = name
       client.description = name
-      if !cilent.active && agree_or_enter("Make this client current")
+      if !client.active && activate
         client.activate
+      else
+        client.save
       end
       client
     end
@@ -26,7 +37,7 @@ module Rtt
         client_name = ask("Client name:") { |q| q.validate = /^\w+$/ }
         client = Client.first :name => client_name
         if client.blank?
-          say "A Client withi this name is not registered."
+          say "A Client with this name is not registered."
           create_client = agree_or_enter("Want to created a Client with that name")
           if create_client
             client = Client.create :name => client_name, :description => client_name
@@ -125,8 +136,7 @@ module Rtt
     end
 
     def build_client_if_not_exists(client_name)
-      client = Client.first_or_create :name => client_name
-      configure_client(client, true)
+      configure_client(client_name)
     end
 
     def build_project_if_not_exists(project_name)

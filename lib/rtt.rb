@@ -97,8 +97,7 @@ module Rtt
     def set_client(name = nil, configure = false)
       if name.blank? || configure
         extend(InteractiveConfigurator)
-        client = name.blank? ? current_client : Client.first(:name => name)
-        configure_client(client)
+        configure_client(name)
       else
         raise ParametersNotMatchCommandSignatureError if name.blank?
         deactivate_current_client if current_client
