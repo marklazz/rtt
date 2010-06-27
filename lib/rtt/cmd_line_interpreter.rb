@@ -90,7 +90,7 @@ module Rtt
     end
 
     def env_filters
-      [ 'from', 'to', 'client', 'project' ].inject({}) do |filters, key|
+      [ 'nickname', 'from', 'to', 'client', 'project' ].inject({}) do |filters, key|
         filters[key.to_sym] = env_variable(key) if env_variable(key).present?
         filters
       end
@@ -134,7 +134,7 @@ module Rtt
         when SetUserCommand
           set_user(cmd.name)
         when DeleteCommand
-          delete_task
+          delete(env_filters)
         when ConfigureCommand
           case cmd.name.downcase
             when 'task'
@@ -146,6 +146,9 @@ module Rtt
             when 'client'
               name = cmd.next_optional
               set_client(name, true)
+            when 'user'
+              name = cmd.next_optional
+              set_user(name, true)
             else
               raise CommandNotFoundError
           end

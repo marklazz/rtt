@@ -14,6 +14,7 @@ module Rtt
       conditions = {}
       conditions[:start_at.gte] = Date.parse(options[:from]) if options[:from]
       conditions[:end_at.lte] = Date.parse(options[:to]) if options[:to]
+      conditions[:user] = { :nickname => options[:nickname] } if options[:nickname]
       conditions[:project] = { :name => options[:project] } if options[:project]
       conditions.deep_merge!({ :project => { :client => { :name => options[:client] } }}) if options[:client]
       conditions

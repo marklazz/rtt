@@ -61,6 +61,13 @@ module Rtt
       convert_to_hour_and_minutes(accumulated_spent_time)
     end
 
+    def duration=(d)
+      return unless !!/^(\d{1,2})[hH]{1,2}(\d{1,2})[mM]{1,2}$/.match(d)
+      self.start_at = DateTime.parse('00:00:01', self.date)
+      self.end_at = DateTime.parse('00:00:01', self.date).advance(:hours => $1.to_i, :minutes => $2.to_i, :seconds => 1)
+      self.accumulated_spent_time = self.time_difference_since_start_at
+    end
+
     def set_default_project
       self.project = Project.default if self.project.nil?
     end

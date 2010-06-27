@@ -27,6 +27,17 @@ module Rtt
       first_or_create :active => true
     end
 
+    def self.find_or_create_active
+      last_user = User.last
+      if last_user.present?
+        last_user.active = true
+        last_user.save
+        last_user
+      else
+        self.default
+      end
+    end
+
     def activate
       self.active = true
       self.save

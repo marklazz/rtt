@@ -21,11 +21,19 @@ module Rtt
     end
 
     def current_user
-      User.first :active => true
+      active = User.first :active => true
+      return active if active.present?
+      User.find_or_create_active
     end
 
-    def delete_task
-      current_task.destroy if current_task
+    def delete(options = {})
+      if current_task && options.blank?
+        current_task.destroy
+      else
+          require 'ruby-debug'; debugger;
+          
+        query(options).map(&:destroy)
+      end
     end
 
     def set_user(nickname = nil, configure = false)
@@ -66,7 +74,7 @@ module Rtt
       say 'Task List'
       say '========='
       query(options).each do |task|
-        say "Name: #{task.name} || Project: #{task.project.name} || Elapsed time: #{task.duration} #{'[ACTIVE]' if task.active} \n"
+        say "Name: #{task.name} || Client: #{task.client.name} || Project: #{task.project.name} || User: #{task.user.nickname} || Elapsed time: #{task.duration} #{'[ACTIVE]' if task.active} \n"
       end
     end
 
