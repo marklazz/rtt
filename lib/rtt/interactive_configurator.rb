@@ -92,28 +92,34 @@ module Rtt
     def configure_task(name = nil, conditions = {})
       conditions.merge!(name.blank? ? { :active => true } : { :name => name })
       task = name.blank? ? Task.first(conditions) : Task.first_or_create(conditions)
-      say "Modify the task information (with name: #{task.name})"
-      say "================================"
-      name = unless agree_or_enter('Want to keep current name')
-              ask("Name:") { |q| q.validate = /^\w+$/ }
-             else
-              task.name
+      if task.present?
+          say "Modify the task information (with name: #{task.name})"
+          say "================================"
+          name = unless agree_or_enter('Want to keep current name')
+                  ask("Name:") { |q| q.validate = /^\w+$/ }
+                 else
+                  task.name
+          end
+          rate = ask_or_default('rate', "Rate:", (task.rate if task.present?), /^[\d]+(\.[\d]+){0,1}$/)
+          task.rate = rate.to_f
+          task.name = name
+          date= ask_or_default('Date', "Date [Format: DD-MM-YYYY]:", (task.date.strftime("%d-%m-%Y") if task.present? && task.date.present?), /^\d{2,2}-\d{2,2}-\d{4,4}$/)
+          task.date = Date.parse(date) if date.present? && task.date != date
+          task.start_at = date
+          task.end_at = date
+          duration = ask_or_default('duration', "Duration:", (task.duration if task.present?), /^(\d{1,2})[hH]{1,2}(\d{1,2})[mM]{1,2}$/)
+          task.duration=(duration) if duration.present?
+          project_name = ask_or_default('project', 'Project name:', (task.project.name if task.present? && task.project.present?), /^\w+$/)
+          task.project=(build_project_if_not_exists(project_name)) if task.project.blank? || project_name != task.project.name
+          user_name = ask_or_default('user', 'User nickname:', (task.user.nickname if task.present? && task.user.present?), /^\w+$/)
+          task.user=(build_user_if_not_exists(user_name)) if task.user.blank? || user_name != task.user.nickname
+          task.save
+          task
+      else
+          name.blank? ?
+          say("There is no active task to configure. Please add the name of task, to this command, to modify it.") :
+          say("There is no task with that name. Please check the available tasks with 'rtt list'.")
       end
-      rate = ask_or_default('rate', "Rate:", (task.rate if task.present?), /^[\d]+(\.[\d]+){0,1}$/)
-      task.rate = rate.to_f
-      task.name = name
-      date= ask_or_default('Date', "Date [Format: DD-MM-YYYY]:", (task.date.strftime("%d-%m-%Y") if task.present? && task.date.present?), /^\d{2,2}-\d{2,2}-\d{4,4}$/)
-      task.date = Date.parse(date) if date.present? && task.date != date
-      task.start_at = date
-      task.end_at = date
-      duration = ask_or_default('duration', "Duration:", (task.duration if task.present?), /^(\d{1,2})[hH]{1,2}(\d{1,2})[mM]{1,2}$/)
-      task.duration=(duration) if duration.present?
-      project_name = ask_or_default('project', 'Project name:', (task.project.name if task.present? && task.project.present?), /^\w+$/)
-      task.project=(build_project_if_not_exists(project_name)) if task.project.blank? || project_name != task.project.name
-      user_name = ask_or_default('user', 'User nickname:', (task.user.nickname if task.present? && task.user.present?), /^\w+$/)
-      task.user=(build_user_if_not_exists(user_name)) if task.user.blank? || user_name != task.user.nickname
-      task.save
-      task
     end
 
     private

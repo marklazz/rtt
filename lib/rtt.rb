@@ -72,7 +72,7 @@ module Rtt
       say 'Task List'
       say '========='
       query(options).each do |task|
-        say "Name: #{task.name} || Client: #{task.client.name} || Project: #{task.project.name} || User: #{task.user.nickname} || Elapsed time: #{task.duration} #{'[ACTIVE]' if task.active} \n"
+        say "Task: #{task.name} || Client: #{task.client.name} || Project: #{task.project.name} || User: #{task.user.nickname} || Elapsed time: #{task.duration} #{'[ACTIVE]' if task.active} \n"
       end
     end
 

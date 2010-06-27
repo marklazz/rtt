@@ -18,12 +18,14 @@ module Rtt
     }
 
     def column_widths(fixed_fields)
-      case fixed_fields.length
-        when 2
-          { 0 => 360, 1 => 60, 2 => 60, 3 => 60 } # total = 540 px
-        when 1
+      case fixed_fields
+        when ['Date', 'Client', 'Project']
+          { 0 => 430, 1 => 50, 2 => 60 } # total = 540 px
+        when ['Client', 'Project']
+          { 0 => 360, 1 => 60, 2 => 60, 3 => 60 }
+        when ['Project', '']
           { 0 => 80, 1 => 290, 2 => 60, 3 => 50, 4 => 60 }
-        else
+        when []
           { 0 => 80, 1 => 80, 2 => 210, 3 => 60, 4 => 50, 5 => 60 }
       end
     end
@@ -82,6 +84,7 @@ module Rtt
     def has_default_value?(field)
       task = self.data[:rows].first
       return true if task.nil?
+      return false if !(field == 'Client' || field == 'Project' || field == 'User')
       (REPORT_FIELD_OUTPUT[field].call(task) if task.present?) == eval("Rtt::#{field}::DEFAULT_NAME")
     end
 
@@ -156,6 +159,7 @@ module Rtt
                      :right_margin => 1.cm,    # units
                      :top_margin => 0.1.dm,    # work
                      :bottom_margin => 0.01.m, # well
+                     :bottom_padding => 0.04.m,
                      :page_size => 'A4') do
 
         report_generator.fill_user_information(self) if report_generator.custom_user_is_defined?
@@ -195,8 +199,10 @@ module Rtt
         text "Total costs: $#{sprintf('%.1f', total_amount)}"
         move_down 10
 
-        number_pages "Page <page> / <total>", [bounds.right - 80, 0]
+        font_size 14
+        number_pages "Page <page> / <total>", [bounds.right - 80, -10]
         say "Report saved at #{output_path}"
+
         render_file output_path
       end
     rescue LoadError

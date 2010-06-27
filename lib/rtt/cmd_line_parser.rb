@@ -134,7 +134,8 @@ module Rtt
         when SetUserCommand
           set_user(cmd.name)
         when DeleteCommand
-          options = env_filters.merge!(:name => cmd.next_optional)
+          name = cmd.name
+          options = name.present? ? env_filters.merge!(:name => name) : env_filters
           delete(options)
         when ConfigureCommand
           case cmd.name.downcase
