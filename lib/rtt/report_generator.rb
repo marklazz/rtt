@@ -61,7 +61,10 @@ module Rtt
     def fixed_fields_for_current_data
       @fixed_fields_for_current_data ||= begin
         calculate_fixed_fields_based_on_data
-        @data[:fixed_fields].keys + @different_fixed.keys.reject { |key| @different_fixed[key].length > 1 }
+        @different_fixed.keys.reject { |key| @different_fixed[key].length > 1 }.inject(@data[:fixed_fields].keys) do |keys, new_key_based_on_data|
+          keys<<(new_key_based_on_data) unless keys.include?(new_key_based_on_data)
+          keys
+        end
       end
     end
 
@@ -93,8 +96,8 @@ module Rtt
     def report options = {}
       raise 'Argument must be a valid Hash. Checkout: rtt usage' unless options.is_a?(Hash) || options.keys.empty?
       @different_fixed ||= FIXED_FIELDS.inject({}) { |result, key| result[key] = []; result }
-      extension = options.keys.select { |key| result = FORMATS_ACCEPTED.include?(key); options.delete(key) if result;result; }.first
-      path = options[extension]
+      extension = options.keys.select { |key| FORMATS_ACCEPTED.include?(key) }.first
+      path = options.delete(extension)
       fixed_fields = extract_fixed_fields(options)
       fixed_fields_and_values = fixed_fields.inject({}) { |hash, key| hash[key] = options[key.downcase.to_sym]; hash }
       filter_options = options.merge({ :order => [:date.desc] })
@@ -151,6 +154,7 @@ module Rtt
       columns = REPORT_FIELDS - fixed_fields_for_current_data
       data = @data[:rows].map { |task| task_row_for_fields(task, columns) }
       title = ENV['title'] || ENV['TITLE'] || "RTT Report"
+      
       total_amount, total_h, total_m = calculate_total_amount_hours_and_minutes(data)
       report_generator = self
 
@@ -202,7 +206,7 @@ module Rtt
         font_size 14
         number_pages "Page <page> / <total>", [bounds.right - 80, -10]
         say "Report saved at #{output_path}"
-
+        
         render_file output_path
       end
     rescue LoadError
