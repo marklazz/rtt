@@ -12,7 +12,7 @@ module Rtt
       'Client' => Proc.new { |task| (task.client.name) if task.client.present? },
       'Project' => Proc.new { |task| (task.project.name) if task.project.present? },
       'Name' => Proc.new { |task| task.name },
-      'Date' => Proc.new { |task| task.date.strftime('%m-%d-%y') },
+      'Date' => Proc.new { |task| task.date.strftime('%m-%d-%y') if task.date.present? },
       'Rate' => Proc.new { |task| task.rate },
       'Duration' => Proc.new { |task| task.duration }
     }
@@ -90,11 +90,12 @@ module Rtt
     def report options = {}
       raise 'Argument must be a valid Hash. Checkout: rtt usage' unless options.is_a?(Hash) || options.keys.empty?
       @different_fixed ||= FIXED_FIELDS.inject({}) { |result, key| result[key] = []; result }
-      extension = options.keys.select { |key| FORMATS_ACCEPTED.include?(key) }.first
+      extension = options.keys.select { |key| result = FORMATS_ACCEPTED.include?(key); options.delete(key) if result;result; }.first
       path = options[extension]
       fixed_fields = extract_fixed_fields(options)
       fixed_fields_and_values = fixed_fields.inject({}) { |hash, key| hash[key] = options[key.downcase.to_sym]; hash }
-      @data = { :fixed_fields => fixed_fields_and_values, :rows => query(options) }
+      filter_options = options.merge({ :order => [:date.desc] })
+      @data = { :fixed_fields => fixed_fields_and_values, :rows => query(filter_options) }
       filename_path = full_path(path)
       case extension
         when :pdf

@@ -103,11 +103,9 @@ module Rtt
       task.rate = rate.to_f
       task.name = name
       date= ask_or_default('Date', "Date [Format: DD-MM-YYYY]:", (task.date.strftime("%d-%m-%Y") if task.present? && task.date.present?), /^\d{2,2}-\d{2,2}-\d{4,4}$/)
-      if date.present? && task.date != date
-        task.date = Date.parse(date)
-        task.start_at = date
-        task.end_at = date
-      end
+      task.date = Date.parse(date) if date.present? && task.date != date
+      task.start_at = date
+      task.end_at = date
       duration = ask_or_default('duration', "Duration:", (task.duration if task.present?), /^(\d{1,2})[hH]{1,2}(\d{1,2})[mM]{1,2}$/)
       task.duration=(duration) if duration.present?
       project_name = ask_or_default('project', 'Project name:', (task.project.name if task.present? && task.project.present?), /^\w+$/)

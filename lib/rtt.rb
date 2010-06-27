@@ -30,8 +30,6 @@ module Rtt
       if current_task && options.blank?
         current_task.destroy
       else
-          require 'ruby-debug'; debugger;
-          
         query(options).map(&:destroy)
       end
     end
