@@ -15,9 +15,9 @@ module Rtt
     include ReportGenerator
     include Storage
 
-    def update_task(name)
+    def update_task(name, conditions)
       extend(InteractiveConfigurator)
-      configure_task(name)
+      configure_task(name, conditions)
     end
 
     def current_user
@@ -113,8 +113,7 @@ module Rtt
     def set_project(project_name = nil, client_name = nil, configure = false)
       if project_name.blank? || configure
         extend(InteractiveConfigurator)
-        project = project_name.blank? ? current_project : Project.first(:name => project_name)
-        configure_project(project)
+        configure_project(project_name, client_name)
       else
         raise ParametersNotMatchCommandSignatureError if project_name.blank?
         deactivate_current_project if current_project

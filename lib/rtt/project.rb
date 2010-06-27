@@ -27,6 +27,10 @@ module Rtt
       first_or_create :active => true
     end
 
+    def self.current_active?
+      first :active => true
+    end
+
     def activate
       deactivate_all
       self.active = true

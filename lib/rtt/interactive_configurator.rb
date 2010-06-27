@@ -5,19 +5,16 @@ module Rtt
     def configure_client(name = nil)
       say "Please fill in your Client information"
       say "======================================"
-      aclient = if name.blank?
+      client = if name.blank?
        if (active_client = Client.first :active => true) && agree_or_enter("Want to modify current")
          active_client
        else
-         name = ask("Client name:") { |q| q.validate = /^\w+$/ }
-         Client.create :name => name
+         modify_name_or_create_model(:client, name)
        end
       else
-        Client.first_or_create :name => name
+        modify_name_or_create_model(:client, name)
       end
-      activate = Client.all.length == 0 || agree_or_enter("Make this client current")
-      client = aclient.present? ? aclient : Client.create(:name => name)
-      client.name = name
+      activate = !Client.current_active? || !client.active && agree_or_enter("Make this client current")
       client.description = name
       if !client.active && activate
         client.activate
@@ -27,14 +24,19 @@ module Rtt
       client
     end
 
-    def configure_project(aproject, skip_name = false)
+    def configure_project(name = nil, client_name = nil)
       say "Please fill in your Project information"
       say "======================================="
-      project_name = skip_name ? aproject.name : ask_or_default('Project name', "Project name:", (aproject.name if aproject.present?), /^\w+$/)
-      rate = ask_or_default('Project rate', "Project rate:", (aproject.rate if aproject.present?),/^[\d]+(\.[\d]+){0,1}$/)
+      project = if name.blank?
+          project_name = ask_or_default('Project name', "Project name:", name, /^\w+$/)
+          Project.first_or_create(:name => project_name)
+        else
+          modify_name_or_create_model(:project, name)
+      end
+      rate = ask_or_default('Project rate', "Project rate:", (project.rate if project.present?),/^[\d]+(\.[\d]+){0,1}$/)
       client_found = false
       while !client_found
-        client_name = ask("Client name:") { |q| q.validate = /^\w+$/ }
+        client_name=(ask("Client name:") { |q| q.validate = /^\w+$/ }) if client_name.blank?
         client = Client.first :name => client_name
         if client.blank?
           say "A Client with this name is not registered."
@@ -44,19 +46,19 @@ module Rtt
             client_found = true
           else
             say "Please try enter a new client name."
+            client_name = nil
           end
         else
           client_found = true
         end
       end
-      project = aproject.present? ? aproject : Project.first_or_create(:name => project_name)
-      project.name = project_name
-      project.description = project_name
+      project.description = project.name
       project.client = client
       project.rate = rate
       project.save
-      if !project.active && agree_or_enter("Make this project current")
+      if !Project.current_active? || !project.active && agree_or_enter("Make this project (and it's client) to be the current one(s)")
         project.activate
+        client.activate unless client.active
       end
       project
     end
@@ -87,36 +89,33 @@ module Rtt
       end
     end
 
-    def configure_task(name = nil)
-      task = name.blank? ? Task.first(:active => true) : Task.first(:name => name)
-      if task.present?
-        say "Modify the task information (with name: #{task.name})"
-        say "================================"
-        name = unless agree_or_enter('Want to keep current name')
-                ask("Name:") { |q| q.validate = /^\w+$/ }
-               else
-                task.name
-        end
-        rate = ask_or_default('rate', "Rate:", (task.rate if task.present?), /^[\d]+(\.[\d]+){0,1}$/)
-        task.rate = rate.to_f
-        task.name = name
-        duration = ask_or_default('duration', "Duration:", (task.duration if task.present?), /^(\d{1,2})[hH]{1,2}(\d{1,2})[mM]{1,2}$/)
-        task.duration=(duration) if duration.present?
-        date= ask_or_default('Date', "Date [Format: DD-MM-YYYY]:", (task.date.strftime("%d-%m-%Y") if task.present? && task.date.present?), /^\d{2,2}-\d{2,2}-\d{4,4}$/)
-        task.date = Date.parse(date) if date.present? && task.date != date
-        client_name = ask_or_default('client', 'Client name:', (task.client.name if task.present? && task.client.present?), /^\w+$/)
-        task.client=(build_client_if_not_exists(client_name)) if task.client.blank? || client_name != task.client.name
-        project_name = ask_or_default('project', 'Project name:', (task.project.name if task.present? && task.project.present?), /^\w+$/)
-        task.project=(build_project_if_not_exists(project_name)) if task.project.blank? || project_name != task.project.name
-        user_name = ask_or_default('user', 'User nickname:', (task.user.nickname if task.present? && task.user.present?), /^\w+$/)
-        task.user=(build_user_if_not_exists(user_name)) if task.user.blank? || user_name != task.user.nickname
-        task.save
-        task
-      else
-        name.blank? ?
-          say("There is no active task to configure. Please add the name of task, to this command, to modify it.") :
-          say("There is no task with that name. Please check the available tasks with 'rtt list'.")
+    def configure_task(name = nil, conditions = {})
+      conditions.merge!(name.blank? ? { :active => true } : { :name => name })
+      task = name.blank? ? Task.first(conditions) : Task.first_or_create(conditions)
+      say "Modify the task information (with name: #{task.name})"
+      say "================================"
+      name = unless agree_or_enter('Want to keep current name')
+              ask("Name:") { |q| q.validate = /^\w+$/ }
+             else
+              task.name
       end
+      rate = ask_or_default('rate', "Rate:", (task.rate if task.present?), /^[\d]+(\.[\d]+){0,1}$/)
+      task.rate = rate.to_f
+      task.name = name
+      date= ask_or_default('Date', "Date [Format: DD-MM-YYYY]:", (task.date.strftime("%d-%m-%Y") if task.present? && task.date.present?), /^\d{2,2}-\d{2,2}-\d{4,4}$/)
+      if date.present? && task.date != date
+        task.date = Date.parse(date)
+        task.start_at = date
+        task.end_at = date
+      end
+      duration = ask_or_default('duration', "Duration:", (task.duration if task.present?), /^(\d{1,2})[hH]{1,2}(\d{1,2})[mM]{1,2}$/)
+      task.duration=(duration) if duration.present?
+      project_name = ask_or_default('project', 'Project name:', (task.project.name if task.present? && task.project.present?), /^\w+$/)
+      task.project=(build_project_if_not_exists(project_name)) if task.project.blank? || project_name != task.project.name
+      user_name = ask_or_default('user', 'User nickname:', (task.user.nickname if task.present? && task.user.present?), /^\w+$/)
+      task.user=(build_user_if_not_exists(user_name)) if task.user.blank? || user_name != task.user.nickname
+      task.save
+      task
     end
 
     private
@@ -140,12 +139,24 @@ module Rtt
     end
 
     def build_project_if_not_exists(project_name)
-      project = Project.first_or_create :name => project_name
-      configure_project(project, true)
+      configure_project(project_name)
     end
 
     def build_user_if_not_exists(user_name)
       configure_user(user_name, true)
+    end
+
+    def modify_name_or_create_model(model_name, name)
+      class_name = model_name.to_s.capitalize
+      klazz = "Rtt::#{class_name}".constantize
+      instance = klazz.first :name => name
+      if instance.present?
+        instance.name=(ask("#{class_name} name:") { |q| q.validate = /^\w+$/ }) unless agree_or_enter('Want to keep current name')
+        instance.save
+        instance
+      else
+        klazz.create :name => name
+      end
     end
   end
 end
