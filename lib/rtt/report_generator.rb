@@ -18,14 +18,13 @@ module Rtt
     }
 
     def column_widths(fixed_fields)
-      case fixed_fields
-        when ['Date', 'Client', 'Project']
-          { 0 => 430, 1 => 50, 2 => 60 } # total = 540 px
-        when ['Client', 'Project']
+      if fixed_fields.same(['Date', 'Client', 'Project'])
+          { 0 => 430, 1 => 50, 2 => 60 }
+      elsif fixed_fields.same(['Client', 'Project'])
           { 0 => 360, 1 => 60, 2 => 60, 3 => 60 }
-        when ['Project', '']
+      elsif fixed_fields.same(['Project']) || fixed_fields.same(['Client'])
           { 0 => 80, 1 => 290, 2 => 60, 3 => 50, 4 => 60 }
-        when []
+      else
           { 0 => 80, 1 => 80, 2 => 210, 3 => 60, 4 => 50, 5 => 60 }
       end
     end
@@ -154,7 +153,7 @@ module Rtt
       columns = REPORT_FIELDS - fixed_fields_for_current_data
       data = @data[:rows].map { |task| task_row_for_fields(task, columns) }
       title = ENV['title'] || ENV['TITLE'] || "RTT Report"
-      
+     
       total_amount, total_h, total_m = calculate_total_amount_hours_and_minutes(data)
       report_generator = self
 
@@ -182,8 +181,11 @@ module Rtt
         fixed_fields.each do |field|
           text("#{field}: #{report_generator.fixed_value(field)}") unless report_generator.has_default_value?(field)
         end
+        
 
         move_down(report_generator.custom_user_is_defined? ? 50 : 0)
+        
+        column_widths = report_generator.column_widths(fixed_fields)
 
         if data.present?
             table(data,
@@ -191,7 +193,7 @@ module Rtt
               :position => :left,
               :border_width   => 1,
               :row_colors => [ 'fafafa', 'f0f0f0' ],
-              :column_widths => report_generator.column_widths(fixed_fields),
+              :column_widths => column_widths,
               :font_size => 12,
               :padding => 5,
               :align => :left)
