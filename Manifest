@@ -6,6 +6,7 @@ USAGE.txt
 bin/rtt
 db/rtt.sqlite3
 lib/rtt.rb
+lib/rtt/array_extensions.rb
 lib/rtt/client.rb
 lib/rtt/cmd_line_parser.rb
 lib/rtt/hash_extensions.rb
