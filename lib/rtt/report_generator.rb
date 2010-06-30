@@ -20,8 +20,10 @@ module Rtt
     def column_widths(fixed_fields)
       if fixed_fields.same(['Date', 'Client', 'Project'])
           { 0 => 430, 1 => 50, 2 => 60 }
-      elsif fixed_fields.same(['Client', 'Project'])
+      elsif fixed_fields.same(['Client', 'Project']) 
           { 0 => 360, 1 => 60, 2 => 60, 3 => 60 }
+      elsif fixed_fields.same(['Client', 'Date']) || fixed_fields.same(['Project', 'Date'])
+          { 0 => 60, 1 => 360, 2 => 60, 3 => 60 }
       elsif fixed_fields.same(['Project']) || fixed_fields.same(['Client'])
           { 0 => 80, 1 => 290, 2 => 60, 3 => 50, 4 => 60 }
       else
