@@ -11,6 +11,8 @@ module Rtt
     private
 
     def rtt_build_conditions options
+      # default filter for today unless a date range is specified
+      options[:date] = Date.today.strftime('%d-%m-%Y') if options[:to].blank? and options[:from].blank? and options[:date].blank?
       conditions = options
       conditions[:date.gte] = Date.parse(options.delete(:from)) if options[:from]
       conditions[:date.lte] = Date.parse(options.delete(:to)) if options[:to]

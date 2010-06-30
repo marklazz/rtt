@@ -3,7 +3,7 @@ require 'echoe'
 
 # PACKAGING ============================================================
 
-Echoe.new('rtt', '0.0.0.20') do |p|
+Echoe.new('rtt', '0.0.0.21') do |p|
   p.description = 'RTT is a tool for tracking time'
   p.url = 'http://github.com/marklazz/rtt'
   p.author = 'Marcelo Giorgi'

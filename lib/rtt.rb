@@ -71,7 +71,6 @@ module Rtt
     def list options = {}
       say 'Task List'
       say '========='
-      options[:date] = Date.today.strftime('%d-%m-%Y') if options[:to].blank? and options[:from].blank? and options[:date].blank?
       query(options).each do |task|
         say "Task: #{task.name} || Client: #{task.client.name} || Project: #{task.project.name} || User: #{task.user.nickname} || Elapsed time: #{task.duration} #{'[ACTIVE]' if task.active} \n"
       end
