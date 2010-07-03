@@ -2,6 +2,18 @@
 module Rtt
   module Storage
 
+    DEFAULT_STORAGE_NAME = :rtt
+
+    def export filename
+      require 'fileutils'
+      FileUtils.cp(File.join( File.dirname(__FILE__), '..', '..', 'db', "#{DEFAULT_STORAGE_NAME.to_s}.sqlite3"), filename)
+    end
+
+    def import filename
+      require 'fileutils'
+      FileUtils.cp(filename, File.join( File.dirname(__FILE__), '..', '..', 'db', "#{DEFAULT_STORAGE_NAME.to_s}.sqlite3"))
+    end
+
     def init(database = :rtt)
       DataMapper.setup(:default, {:adapter => "sqlite3", :database => File.join( File.dirname(__FILE__), '..', '..', 'db', "#{database.to_s}.sqlite3") })
       migrate unless missing_tables

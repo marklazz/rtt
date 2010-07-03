@@ -13,6 +13,12 @@ module Rtt
   class DeleteCommand < Command
     NUMBER_OF_PARAM_REQUIRED = 0
   end
+  class ExportCommand < Command
+    NUMBER_OF_PARAM_REQUIRED = 1
+  end
+  class ImportCommand < Command
+    NUMBER_OF_PARAM_REQUIRED = 1
+  end
   class PauseCommand < Command
     NUMBER_OF_PARAM_REQUIRED = 0
   end
@@ -58,7 +64,9 @@ module Rtt
      :resume => StartCommand,
      :user => SetUserCommand,
      :delete => DeleteCommand,
-     :configure => ConfigureCommand
+     :configure => ConfigureCommand,
+     :export => ExportCommand,
+     :import => ImportCommand
     }
 
     def capture(arguments)
@@ -133,6 +141,10 @@ module Rtt
           list(env_filters)
         when SetUserCommand
           set_user(cmd.name)
+        when ImportCommand
+          import(cmd.name)
+        when ExportCommand
+          export(cmd.name)
         when DeleteCommand
           name = cmd.name
           options = name.present? ? env_filters.merge!(:name => name) : env_filters
