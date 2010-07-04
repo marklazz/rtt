@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -w
+#!/usr/bin/env ruby
 module Rtt
   module QueryBuilder
     # Query among all tasks filtering based on parameters.

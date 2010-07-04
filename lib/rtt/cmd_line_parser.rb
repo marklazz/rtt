@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -w
+#!/usr/bin/env ruby
 module Rtt
   class Command
     attr_accessor :name, :optional

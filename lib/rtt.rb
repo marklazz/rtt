@@ -1,7 +1,7 @@
-#!/usr/bin/ruby -w
+#!/usr/bin/env ruby
 require 'rubygems'
-gem 'activesupport', [ '>= 2.3.5', '<= 2.3.8' ]
-%w( active_support dm-core dm-validations dm-migrations highline/import).each { |lib| require lib }
+gem 'activesupport', [ '>= 2.3.5', '<= 2.3.8' ], :require => 'active_support'
+%w( dm-core dm-validations dm-migrations highline/import active_support).each { |lib| require lib }
 Dir[File.expand_path(File.join(File.dirname(__FILE__), 'rtt', '*'))].each { |lib| require lib; }
 
 module Rtt

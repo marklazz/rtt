@@ -1,4 +1,4 @@
-#!/usr/bin/ruby -w
+#!/usr/bin/env ruby
 module Rtt
   class Client
     include DataMapper::Resource
