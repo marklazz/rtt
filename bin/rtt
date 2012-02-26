@@ -2,7 +2,10 @@
 # The command line Haml parser.
 $LOAD_PATH.unshift File.dirname(__FILE__) + '/../lib'
 
-require 'rtt'
-Rtt.init
-command = Rtt.capture(ARGV)
-Rtt.execute(command)
+require 'rtt/system_extensions'
+with_warnings_suppressed do
+    require 'rtt'
+  Rtt.init
+  command = Rtt.capture(ARGV)
+  Rtt.execute(command)
+end

@@ -10,6 +10,7 @@ db/rtt.sqlite3
 db/test.sqlite3
 lib/rtt.rb
 lib/rtt/array_extensions.rb
+lib/rtt/boot.rb
 lib/rtt/client.rb
 lib/rtt/cmd_line_parser.rb
 lib/rtt/hash_extensions.rb
@@ -18,6 +19,7 @@ lib/rtt/project.rb
 lib/rtt/query_builder.rb
 lib/rtt/report_generator.rb
 lib/rtt/storage.rb
+lib/rtt/system_extensions.rb
 lib/rtt/task.rb
 lib/rtt/user.rb
 log/rtt.sqlite3
