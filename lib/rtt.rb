@@ -1,13 +1,14 @@
 #!/usr/bin/env ruby
 require 'thread'
-require 'rtt/boot'
-require 'active_support'
-%w( dm-core dm-validations dm-migrations highline/import).each { |lib| require lib }
-Dir[File.expand_path(File.join(File.dirname(__FILE__), 'rtt', '*'))].each { |lib| require lib; }
+require File.expand_path(File.join( File.dirname(__FILE__), 'rtt', 'boot'))
+%w( active_support active_record highline/import).each { |lib| require lib }
+Dir[File.expand_path(File.join(File.dirname(__FILE__), 'extensions', '*'))].each { |lib| require lib; }
+Dir[File.expand_path(File.join(File.dirname(__FILE__), 'models', '*'))].each { |lib| require lib; }
+Dir[File.expand_path(File.join(File.dirname(__FILE__), 'rtt', '*'))].each { |lib| require(lib) unless File.directory?(lib); }
 
 module Rtt
 
-  VERSION = '1.0'
+  VERSION = '0.0.3'
 
   extend self
 
@@ -24,7 +25,7 @@ module Rtt
     end
 
     def current_user
-      active = User.first :active => true
+      active = User.where(:active => true).first
       return active if active.present?
       User.find_or_create_active
     end
@@ -41,7 +42,7 @@ module Rtt
       user = if nickname.blank?
                current_user
              else
-               User.first(:nickname => nickname)
+               User.where(:nickname => nickname).first
       end
       current_user.deactivate if current_user
       if user.blank? || configure
@@ -119,7 +120,7 @@ module Rtt
         raise ParametersNotMatchCommandSignatureError if project_name.blank?
         deactivate_current_project if current_project
         client = client(client_name) unless client_name.nil?
-        project = Project.first_or_create :name => project_name
+        project = Project.find_or_create_by_name project_name
         project.client = client
         project.description = project_name
         unless project.active
@@ -150,21 +151,21 @@ module Rtt
     end
 
     def current_client
-      Client.first :active => true
+      Client.where(:active => true).first
     end
 
     def current_project
-      Project.first :active => true
+      Project.where(:active => true).first
     end
 
     def current_task
-      Task.first :active => true
+      Task.where(:active => true).first
     end
 
     private
 
     def client(name)
-      Client.first_or_create :name => name, :description => name
+      Client.find_or_create_by_name_and_description(name, name)
     end
 
     def deactivate_current_client

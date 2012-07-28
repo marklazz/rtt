@@ -1,11 +1,10 @@
 require 'mocha'
-require File.join( File.dirname(__FILE__), '..', '..', 'datamapper_spec_helper')
+require File.expand_path(File.join( File.dirname(__FILE__), '..', '..', 'ar_spec_helper'))
 
-describe Rtt::Task do
+describe Task do
 
   before do
-    Rtt.init(:test)
-    Rtt.migrate
+    setup_testing_env
     @task_name = 'a_name'
     @now = Time.now
   end
@@ -16,7 +15,7 @@ describe Rtt::Task do
 
       before do
         start_at = Time.parse('May 10 13:45:00 2010', @now)
-        @task = Rtt::Task.create :name => @task_name, :start_at => start_at.to_datetime, :date => start_at.to_date
+        @task = Task.create :name => @task_name, :start_at => start_at.to_datetime, :date => start_at.to_date
       end
 
       context 'task has end_at: 2010-05-10 14:15:01' do
@@ -58,12 +57,12 @@ describe Rtt::Task do
         end
 
         it 'should have 2 tasks with the same name' do
-          Rtt::Task.all(:name => @task_name).length.should == 2
+          Task.where(:name => @task_name).count.should == 2
         end
 
         it 'should return 11h15m for 2010-05-10' do
           date = Time.parse('2010-05-10', @now).to_date
-          task = Rtt::Task.first(:name => @task_name, :date => date)
+          task = Task.where(:name => @task_name, :date => date).first
           task.duration.should == '10h14m'
         end
 
@@ -82,18 +81,18 @@ describe Rtt::Task do
         end
 
         it 'should have 3 tasks with the same name' do
-          Rtt::Task.all(:name => @task_name).length.should == 3
+          Task.where(:name => @task_name).count.should == 3
         end
 
         it 'should return 11h15m for 2010-05-11' do
           date = Time.parse('2010-05-11', @now).to_date
-          task = Rtt::Task.first(:name => @task_name, :date => date)
+          task = Task.where(:name => @task_name, :date => date).first
           task.duration.should == '23h59m'
         end
 
         it 'should return 11h15m for 2010-05-10' do
           date = Time.parse('2010-05-10', @now).to_date
-          task = Rtt::Task.first(:name => @task_name, :date => date)
+          task = Task.where(:name => @task_name, :date => date).first
           task.duration.should == '10h14m'
         end
 

@@ -32,7 +32,7 @@ module Rtt
     end
 
     def custom_user_is_defined?
-      current_user.present? && current_user.nickname != Rtt::User::DEFAULT_NICK
+      current_user.present? && current_user.nickname != User::DEFAULT_NICK
     end
 
     def fill_user_information(pdf)
@@ -89,7 +89,7 @@ module Rtt
       task = self.data[:rows].first
       return true if task.nil?
       return false if !(field == 'Client' || field == 'Project' || field == 'User')
-      (REPORT_FIELD_OUTPUT[field].call(task) if task.present?) == eval("Rtt::#{field}::DEFAULT_NAME")
+      (REPORT_FIELD_OUTPUT[field].call(task) if task.present?) == eval("#{field}::DEFAULT_NAME")
     end
 
     #
@@ -101,8 +101,7 @@ module Rtt
       path = options.delete(extension)
       fixed_fields = extract_fixed_fields(options)
       fixed_fields_and_values = fixed_fields.inject({}) { |hash, key| hash[key] = options[key.downcase.to_sym]; hash }
-      filter_options = options.merge({ :order => [:date.desc] })
-      @data = { :fixed_fields => fixed_fields_and_values, :rows => query(filter_options) }
+      @data = { :fixed_fields => fixed_fields_and_values, :rows => query(options).order('date desc') }
       filename_path = full_path(path)
       case extension
         when :pdf

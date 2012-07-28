@@ -23,7 +23,7 @@ end
 Spec::Rake::SpecTask.new(:spec) do |t|
   t.spec_opts = ['--color']
   t.rcov = false
-  t.spec_files = FileList['spec/lib/*_spec.rb', 'spec/lib/rtt/*_spec.rb']
+  t.spec_files = FileList['spec/lib/**/*_spec.rb']
 end
 
 task :default => :spec

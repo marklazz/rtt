@@ -6,7 +6,7 @@ module Rtt
       say "Please fill in your Client information"
       say "======================================"
       client = if name.blank?
-       if (active_client = Client.first :active => true) && agree_or_enter("Want to modify current")
+       if (active_client = Client.where(:active => true).first) && agree_or_enter("Want to modify current")
          active_client
        else
          modify_name_or_create_model(:client, name)
@@ -29,7 +29,7 @@ module Rtt
       say "======================================="
       project = if name.blank?
           project_name = ask_or_default('Project name', "Project name:", name, /^\w+$/)
-          Project.first_or_create(:name => project_name)
+          Project.find_or_create_by_name(project_name)
         else
           modify_name_or_create_model(:project, name)
       end
@@ -37,7 +37,7 @@ module Rtt
       client_found = false
       while !client_found
         client_name=(ask("Client name:") { |q| q.validate = /^\w+$/ }) if client_name.blank?
-        client = Client.first :name => client_name
+        client = Client.where(:name => client_name).first
         if client.blank?
           say "A Client with this name is not registered."
           create_client = agree_or_enter("Want to created a Client with that name")
@@ -69,7 +69,7 @@ module Rtt
       if !skip_name || nickname.blank? || nickname == User::DEFAULT_NICK
         nickname = ask_or_default('nickname', 'Nickname (Required):', nickname, /^\w+$/)
       end
-      existing = User.first :nickname => nickname
+      existing = User.where(:nickname => nickname).first
       first_name = ask_or_default('first name', "First name:", (existing.first_name if existing.present?))
       last_name = ask_or_default('last name', 'Last name:', (existing.last_name if existing.present?))
       company = ask_or_default('company', 'Company:', (existing.company if existing.present?))
@@ -91,7 +91,11 @@ module Rtt
 
     def configure_task(name = nil, conditions = {})
       conditions.merge!(name.blank? ? { :active => true } : { :name => name })
-      task = name.blank? ? Task.first(conditions) : Task.first_or_create(conditions)
+      task = if name.blank?
+        Task.where(conditions).first
+        else
+         Task.where(conditions).first || Task.create(conditions)
+      end
       if task.present?
           say "Modify the task information (with name: #{task.name})"
           say "================================"
@@ -152,8 +156,8 @@ module Rtt
 
     def modify_name_or_create_model(model_name, name)
       class_name = model_name.to_s.capitalize
-      klazz = "Rtt::#{class_name}".constantize
-      instance = klazz.first :name => name
+      klazz = class_name.constantize
+      instance = klazz.where(:name => name).first
       if instance.present?
         instance.name=(ask("#{class_name} name:") { |q| q.validate = /^\w+$/ }) unless agree_or_enter('Want to keep current name')
         instance.save

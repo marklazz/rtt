@@ -1,17 +1,16 @@
-require File.join( File.dirname(__FILE__), '..', 'datamapper_spec_helper')
+require File.expand_path(File.join( File.dirname(__FILE__), '..', 'ar_spec_helper'))
 
 describe Rtt do
 
   before do
-    Rtt.init(:test)
-    Rtt.migrate
+    setup_testing_env
   end
 
   describe '#set_project' do
 
     it 'should set the project as current at system-level' do
       Rtt.set_project 'project_name'
-      Rtt::Project.first(:active => true).name.should == 'project_name'
+      Project.where(:active => true).first.name.should == 'project_name'
     end
 
   end
@@ -20,7 +19,7 @@ describe Rtt do
 
     it 'should set the client as current at system-level' do
       Rtt.set_client 'client_name'
-      Rtt::Client.first(:active => true).name.should == 'client_name'
+      Client.where(:active => true).first.name.should == 'client_name'
     end
 
   end
@@ -31,9 +30,8 @@ describe Rtt do
 
       it 'should not create a task' do
         Rtt.start 'development_task'
-        Rtt::Task.all.length == 0
+        Task.all.length == 0
       end
-
     end
   end
 
@@ -43,7 +41,7 @@ describe Rtt do
 
       it 'should start a task for the name given' do
         Rtt.start 'development_task'
-        task = Rtt::Task.first(:name => 'development_task')
+        task = Task.where(:name => 'development_task').first
         task.should_not be_nil
       end
 
@@ -52,23 +50,23 @@ describe Rtt do
     describe 'when there is a current task' do
 
       before do
-        @current_task = Rtt::Task.create :name => 'older_task', :start_at => Date.today.beginning_of_day, :active => true, :rate => 100
+        @current_task = Task.create :name => 'older_task', :start_at => Date.today.beginning_of_day, :active => true, :rate => 100
       end
 
       it 'should create a new task' do
         task = Rtt.start 'development_task'
-        Rtt::Task.all.length.should == 2
+        Task.all.length.should == 2
       end
 
       it 'should change end_at of older_task' do
         @end_at = @current_task.end_at
         Rtt.start 'development_task'
-        Rtt::Task.first(:name => 'development_task').end_at.should == @end_at
+        Task.where(:name => 'development_task').first.end_at.should == @end_at
       end
 
       it 'should change set active to false of older_task' do
         Rtt.start 'development_task'
-        Rtt::Task.first(:name => 'development_task').active.should be_true
+        Task.where(:name => 'development_task').first.active.should be_true
       end
 
       describe 'task name is passed' do
@@ -92,12 +90,12 @@ describe Rtt do
 
       it 'should reference the default client' do
         task = Rtt.start 'development_task'
-        task.client.name.should == Rtt::Client::DEFAULT_NAME
+        task.client.name.should == Client::DEFAULT_NAME
       end
 
       it 'should reference the default project' do
         task = Rtt.start 'development_task'
-        task.project.name.should == Rtt::Project::DEFAULT_NAME
+        task.project.name.should == Project::DEFAULT_NAME
       end
     end
 
@@ -116,12 +114,12 @@ describe Rtt do
     describe 'when there is a current task' do
 
       before do
-        Rtt::Task.create :name => 'older_task', :start_at => Date.today.beginning_of_day, :active => true, :rate => 100
+        Task.create :name => 'older_task', :start_at => Date.today.beginning_of_day, :active => true, :rate => 100
       end
 
       it 'should finish the task' do
         Rtt.stop
-        Rtt::Task.first(:name => 'older_task').active.should be_false
+        Task.where(:name => 'older_task').first.active.should be_false
       end
     end
 
@@ -135,7 +133,7 @@ describe Rtt do
 
       it 'should keep the same number of Tasks' do
         Rtt.stop
-        Rtt::Task.all.length.should be_zero
+        Task.all.length.should be_zero
       end
     end
   end
@@ -145,19 +143,19 @@ describe Rtt do
     describe 'When there is a current task' do
 
       before do
-        @current_task = Rtt::Task.create :name => 'older_task', :start_at => Date.today.beginning_of_day, :active => true, :rate => 100
+        @current_task = Task.create :name => 'older_task', :start_at => Date.today.beginning_of_day, :active => true, :rate => 100
       end
 
       it 'should change the name' do
         @id = @current_task.id
         Rtt.rename 'newer_task'
-        Rtt::Task.get(@id).name.should == 'newer_task'
+        Task.find(@id).name.should == 'newer_task'
       end
 
       it 'should keep the number of tasks' do
-        counter = Rtt::Task.all.length
+        counter = Task.all.length
         Rtt.rename 'newer_task'
-        Rtt::Task.all.length.should == counter
+        Task.all.length.should == counter
       end
     end
 
@@ -165,7 +163,7 @@ describe Rtt do
 
       it 'should not create a new task' do
         Rtt.rename 'newer_task'
-        Rtt::Task.all.length.should be_zero
+        Task.all.length.should be_zero
       end
     end
   end

@@ -1,31 +1,40 @@
 #!/usr/bin/env ruby
+require 'rubygems'
+require 'active_record'
+require 'logger'
 module Rtt
   module Storage
 
-    DEFAULT_STORAGE_NAME = :rtt
+    def database_file
+      File.expand_path(File.join(File.dirname(__FILE__), '..', '..', config['database']))
+    end
 
     def export filename
       require 'fileutils'
-      FileUtils.cp(File.join( File.dirname(__FILE__), '..', '..', 'db', "#{DEFAULT_STORAGE_NAME.to_s}.sqlite3"), filename)
+      FileUtils.cp(database_file, filename)
     end
 
     def import filename
       require 'fileutils'
-      FileUtils.cp(filename, File.join( File.dirname(__FILE__), '..', '..', 'db', "#{DEFAULT_STORAGE_NAME.to_s}.sqlite3"))
+      FileUtils.cp(filename, database_file)
     end
 
-    def init(database = :rtt)
-      DataMapper.setup(:default, {:adapter => "sqlite3", :database => File.join( File.dirname(__FILE__), '..', '..', 'db', "#{database.to_s}.sqlite3") })
-      migrate unless missing_tables
-      #DataObjects::Sqlite3.logger = DataMapper::Logger.new(File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'log', 'sqlite3.log')), 0)
+    def config(env = :production)
+      @config ||= YAML::load_file(File.join(File.dirname(__FILE__), '..', '..', 'db', 'config.yml'))[env.to_s]
     end
 
-    def migrate #:nodoc:
-      DataMapper.auto_migrate!
+    def init(env = :production)
+      ActiveRecord::Base.establish_connection(config(env).merge('database' => database_file))
+      log_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'log'))
+      Dir::mkdir(log_dir) unless FileTest::directory?(log_dir)
+      ActiveRecord::Base.logger = Logger.new(File.open(File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'log', 'database.log')), 'a'))
+      silence_stream(STDOUT) do
+        require File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'db', 'schema.rb')) unless tables_exists?
+      end
     end
 
-    def missing_tables
-      %W(rtt_projects rtt_users rtt_clients rtt_tasks).reject { |table| DataMapper.repository.storage_exists?(table) }.empty?
+    def tables_exists?
+      %w(projects clients tasks users).any? { |t| ActiveRecord::Base.connection.tables.include?(t) }
     end
   end
 end

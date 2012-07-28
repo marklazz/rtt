@@ -1,13 +1,12 @@
-RTT - Ruby Time Tracker
------------------------
------------------------
+h1. RTT - Ruby Time Tracker
 
 RTT is a tool for tracking time. It's primary extend is to be used from command line. It could be used by simple typing:
 
-How to start a task?
---------------------
+h2. How to start a task?
 
+<pre>
 $ rtt '<task-name>' ( or the more explicit way: 'rtt start <task-name>')
+</pre>
 
 That simple!
 
@@ -17,18 +16,23 @@ If no <task-name> is specified the last paused one is activated, otherwise a tas
 
 Then to stop the timer, you can do:
 
+<pre>
 $ rtt stop | pause | resume (if there is a paused task)
+</pre>
 
 Each new task belongs to a the current Project, Client and User. If there isn't any of those already configured, then the system will create them for you (you can change them later). Read 'More about the API' section.
 
-Installation
-------------
+h2. Installation
 
+<pre>
 [sudo] gem install rtt
+</pre>
 
 After installing the gem you will need to setup some basic information of yours (data to be printed in the reports). With the following command:
 
+<pre>
 $ rtt configure user [<user-nick-name>]
+</pre>
 
 Then you will be prompt for First name, Last name, country, city, e-mail, site, etc. Information that will be used to fill-in the reports.
 
@@ -36,61 +40,74 @@ The only required field is the Nickname, which identifies the user.
 
 Note: This configuration step is not required, but if you don't do this your reports will lack any personal information.
 
-
-More about the API
-------------------
+h2. More about the API
 
 To configure the current Project, Client or Task you can use an analogous command:
 
+<pre>
 $ rtt configure project [<project-name>] || rtt configure client [<client-name>] || rtt configure task [<task-name>]
+</pre>
 
 After which, you'll be prompted for the attributes for those models.
 
 If you just want to change the current project. You can do this:
 
+<pre>
 $ rtt project <project-name>
+</pre>
 
 Anagolous, you can change the current Client by typing:
 
+<pre>
 $ rtt client <client-name>
+</pre>
 
 To list all task you can use
 
+<pre>
 $ rtt list
+</pre>
 
 Also, if you have added times for different projects or clients and you may want to filtered this list by one of those dimensions. Then you can do that, by using environment variables like this:
 
+<pre>
 $ CLIENT=MyClient PROJECT=SomeProject rtt list
+</pre>
 
 This command will list all tasks that belongs to the client called 'MyClient' and to the project called 'SomeProject'.
 
-Report
--------
+h2. Report
 
 RTT allow you to build a pdf document with all the entries using the following command:
 
+<pre>
 $ rtt report <output-filename>
+</pre>
 
 Also, you can filter the entries of this report in a similar manner as you would do for 'list' command. For example:
 
+<pre>
 $ PROJECT=SomeProject rtt report
+</pre>
 
 This will generate a report for the project 'SomeProject'.
 
+<pre>
 $ FROM=20-01-2010 TO=25-01-2010 CLIENT=SomeClient rtt report
+</pre>
 
 The output for this command will produce a report only for the task started after 20th of January and before 25th of January and also that were produced for the client called 'SomeClient'.
 
 Also, You could filter not for a date range, but for a specifc date and/or for a user nickname, like this:
 
+<pre>
 $ DATE="20-01-2010" NICKNAME="marklazz" rtt report /home/marcelo/some_filename.pdf
+</pre>
 
-Final thoughts
---------------
+h2. Final thoughts
 
 Enjoy!
 
-Questions/Comments
-------------------
+h2. Questions/Comments
 
-Feel free to email {Marcelo Andrés Giorgi Martínez}[mailto:marklazz.uy@gmail.com] for any comment or question.
+Feel free to email "Marcelo Andrés Giorgi Martínez":mailto:marklazz.uy@gmail.com for any comment or question.

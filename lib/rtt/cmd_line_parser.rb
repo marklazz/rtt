@@ -99,7 +99,14 @@ module Rtt
 
     def env_filters
       [ 'date', 'nickname', 'from', 'to', 'client', 'project' ].inject({}) do |filters, key|
-        filters[key.to_sym] = env_variable(key) if env_variable(key).present?
+        if env_variable(key).present?
+          value = if key == 'date' || key == 'from' || key == 'to'
+            Date.parse(env_variable(key))
+          else
+            env_variable(key)
+          end
+          filters[key.to_sym] = value
+        end
         filters
       end
     end
@@ -152,7 +159,8 @@ module Rtt
         when ConfigureCommand
           case cmd.name.downcase
             when 'task'
-              update_task(cmd.optional, env_filters)
+              name = cmd.next_optional
+              update_task(name, env_filters)
             when 'project'
               name = cmd.next_optional
               client = cmd.next_optional
