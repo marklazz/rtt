@@ -6,8 +6,8 @@ module Rtt
     #
     def query options = {}
       relation = Task.where(rtt_build_conditions(options))
-      relation = relation.where(table[:date].gt(Date.parse(options.delete(:from)))) if options[:from]
-      relation = relation.where(table[:date].lt(Date.parse(options.delete(:to)))) if options[:to]
+      relation = relation.where(table[:date].gt(options.delete(:from))) if options[:from]
+      relation = relation.where(table[:date].lt(options.delete(:to))) if options[:to]
       relation
     end
 
@@ -19,9 +19,9 @@ module Rtt
 
     def rtt_build_conditions options
       # default filter for today unless a date range is specified
-      options[:date] = Date.today.strftime('%d-%m-%Y') if options[:to].blank? and options[:from].blank? and options[:date].blank?
+      options[:date] = Date.today if options[:to].blank? and options[:from].blank? and options[:date].blank?
       conditions = options.reject { |k,_| k.to_s == 'from' || k.to_s == 'to' }
-      conditions[:date] = Date.parse(options.delete(:date)) if options[:date]
+      conditions[:date] = options.delete(:date) if options[:date]
       conditions[:user] = { :nickname => options.delete(:nickname) } if options[:nickname]
       conditions[:project] = { :name => options.delete(:project) } if options[:project]
       conditions.deep_merge!({ :project => { :client => { :name => options.delete(:client) } }}) if options[:client]

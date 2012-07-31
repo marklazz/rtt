@@ -7,9 +7,7 @@ Rakefile
 USAGE.txt
 bin/rtt
 db/config.yml
-db/production.sqlite3
-db/schema.rb
-db/test.sqlite3
+db/rtt.sqlite3
 lib/extensions/array.rb
 lib/extensions/date.rb
 lib/extensions/hash.rb

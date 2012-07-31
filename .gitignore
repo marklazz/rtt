@@ -1,4 +1,4 @@
-db/*
+db/*.sqlite3
 pkg/*
 log/*
 .rbenv-version

@@ -8,7 +8,7 @@ Dir[File.expand_path(File.join(File.dirname(__FILE__), 'rtt', '*'))].each { |lib
 
 module Rtt
 
-  VERSION = '0.0.3'
+  VERSION = '0.0.4'
 
   extend self
 

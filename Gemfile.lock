@@ -62,7 +62,7 @@ PLATFORMS
 DEPENDENCIES
   activerecord (= 3.2.6)
   activesupport (= 3.2.6)
-  debugger
+  debugger (= 1.2.0)
   echoe
   gemcutter (= 0.7.1)
   hanna

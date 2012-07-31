@@ -11,7 +11,7 @@ gem 'rake', '0.8.2'
 gem 'gemcutter', '0.7.1'
 
 group :development do
-  gem 'debugger'
+  gem 'debugger', '1.2.0'
   gem 'rspec', '1.3.0'
   gem 'mocha'
   gem 'hanna'
